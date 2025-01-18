@@ -88,10 +88,18 @@ public class Config {
         return config.getBoolean("features.night-skip", true);  // Default to true if not set
     }
     
+    public boolean isCSMEnabled() {
+        return config.getBoolean("features.custom-sleep-message", true);  // Default to true if not set
+    }
+    
     public boolean isChatFormattingEnabled() {
         return config.getBoolean("features.chat-formatting", true);  // Default to true if not set
     }
-
+    
+    public String getWorldFolder() {
+        return config.getString("world-folder", "./world"); // Default to "./world" if not set
+    }
+    
     public int maxNicknameLength() {
         return config.getInt("features.nickname-length", 32);  // Default to 32 if not set
     }

@@ -6,8 +6,6 @@ import main.java.org.matejko.plugin.FileCreator.*;
 import main.java.org.matejko.plugin.Listeners.*;
 import main.java.org.matejko.plugin.Utilis;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import com.earth2me.essentials.Essentials;
 import java.util.HashSet;
@@ -43,85 +41,103 @@ public class UtilisInitializer {
         }
         // Initialize ISee
         ISeeManager iSeeManager = new ISeeManager(config);
+        logger.info("[Utilis] ISeeManager initialized.");
         ISeeInventoryListener iSeeInventoryListener = new ISeeInventoryListener(plugin, iSeeManager);
         @SuppressWarnings("unused")
         ISeeArmorListener iSeeArmorListener = new ISeeArmorListener(plugin, iSeeManager);
         Bukkit.getPluginManager().registerEvents(new ISeeArmorRemover(iSeeManager), plugin);
         Bukkit.getPluginManager().registerEvents(iSeeInventoryListener, plugin);
         UtilisGetters.setISeeManager(iSeeManager);
+        logger.info("[Utilis] ISee initialisation completed.");
         // ChatFormattingManager setup
         ChatFormattingManager chatFormattingManager = new ChatFormattingManager(plugin);
         chatFormattingManager.loadConfiguration();
         Bukkit.getPluginManager().registerEvents(chatFormattingManager, plugin);
+        logger.info("[Utilis] ChatFormattingManager is enabled.");
         // VanishedPlayersManager
         Set<VanishUserManager> vanishedPlayers = new HashSet<>();
         VanishedPlayersManager vanishedPlayersManager = new VanishedPlayersManager(plugin, config);
         vanishedPlayersManager.loadVanishedPlayers(vanishedPlayers);
+        if (config.isDebugEnabled()) {
+        	logger.info("[Utilis] VanishedPlayersManager setup complete.");}
         // Register the VanishEntityEventListener
-        new VanishEntityEventListener(plugin); 
+        new VanishEntityEventListener(plugin);
+        if (config.isDebugEnabled()) {
+        	logger.info("[Utilis] VanishEntityEventListener registered.");}
         // NickManager and cooldown setup
         NickManager nickManager = new NickManager(plugin, config);
         Messages messages = new Messages(plugin);
         CooldownManager cooldownManager = new CooldownManager(plugin, 15);
         Bukkit.getPluginManager().registerEvents(nickManager, plugin);
+        logger.info("[Utilis] NickManager and CooldownManager initialised.");
         // UtilisNotifier setup
         UtilisNotifier utilisNotifier = new UtilisNotifier(plugin, config);
         Bukkit.getPluginManager().registerEvents(utilisNotifier, plugin);
+        logger.info("[Utilis] UtilisNotifier setup complete.");
         // Command registration
         UtilisCommands utilisCommands = new UtilisCommands(plugin, config, nickManager, cooldownManager, messages);
         utilisCommands.registerCommands();
+        if (config.isDebugEnabled()) {
+        	logger.info("[Utilis] Commands registered successfully.");}
         // MOTD Manager
         MOTDManager motdManager = null;
         if (config.isMOTDEnabled()) {
             motdManager = new MOTDManager(plugin, config);
+            logger.info("[Utilis] MOTD is enabled.");
+        } else {
+            logger.info("[Utilis] MOTD is in config disabled.");
         }
         // Register the RecoverManager as an event listener
         RecoverManager recoverManager = new RecoverManager();
         plugin.getServer().getPluginManager().registerEvents(recoverManager, plugin);
         plugin.getCommand("recover").setExecutor(new RecoverCommand(recoverManager));
+        logger.info("[Utilis] RecoverManager initialised.");
         // Plugin Updater
         UtilisPluginUpdater pluginUpdater = new UtilisPluginUpdater(plugin, config);
         pluginUpdater.registerListener();
         if (config.isUpdateEnabled()) {
             pluginUpdater.checkForUpdates();
+            logger.info("[Utilis] Plugin Updater is enabled.");
         } else {
-            logger.info("[Utilis] Update check is disabled in the config.");
+            logger.info("[Utilis] Plugin Updater is disabled in the config.");
         }
         // Sleeping Manager
         SleepingManager sleepingManager = null;
         if (config.isSleepingEnabled()) {
-            sleepingManager = new SleepingManager(plugin);
+            sleepingManager = new SleepingManager(plugin, config);
             sleepingManager.loadConfiguration();
             Bukkit.getPluginManager().registerEvents(sleepingManager, plugin);
-            SleepingCommand sleepingCommand = new SleepingCommand(plugin);
-            plugin.getCommand("ns").setExecutor((sender, command, label, args) -> {
-                if (!(sender instanceof Player)) {
-                    sender.sendMessage("Only players can use this command.");
-                    return true;
-                }
-                Player player = (Player) sender;
-                if (!player.hasPermission("utilis.ns")) {
-                    player.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
-                    return true;
-                }
-                return sleepingCommand.onCommand(sender, command, label, args);
-            });
+            SleepingCommand sleepingCommand = new SleepingCommand(plugin, sleepingManager);
+            plugin.getCommand("sleepmessage").setExecutor(new SleepMessageCommand(plugin));
+            plugin.getCommand("ns").setExecutor(sleepingCommand);
+            logger.info("[Utilis] Sleeping is enabled.");
         } else {
             logger.info("[Utilis] Sleeping is disabled in the config.");
         }
+
         // QoL Manager
         if (config.isQoLEnabled()) {
             Bukkit.getPluginManager().registerEvents(new QoLManager(), plugin);
+            logger.info("[Utilis] QoL is enabled.");
+        } else {
+            logger.info("[Utilis] QoL is disabled in config.");
         }
         // MinecartFallDamageManager
         if (config.isMinecartdmgFixEnabled()) {
-        MinecartFallDamageManager fallDamageManager = new MinecartFallDamageManager(plugin, config);
-        Bukkit.getPluginManager().registerEvents(new MinecartEventListener(fallDamageManager), plugin);
+            MinecartFallDamageManager fallDamageManager = new MinecartFallDamageManager(plugin, config);
+            Bukkit.getPluginManager().registerEvents(new MinecartEventListener(fallDamageManager), plugin);
+            if (config.isDebugEnabled()) {
+            	logger.info("[Utilis] MinecartFallDamageManager is enabled.");}
+        } else {
+        	if (config.isDebugEnabled()) {
+        		logger.info("[Utilis] MinecartFallDamageManager is disabled in config.");}
         }
         // Dynmap setup
         Plugin dynmapPlugin = Bukkit.getPluginManager().getPlugin("dynmap");
         if (dynmapPlugin == null) {
             logger.warning("[Utilis] Dynmap plugin not found!");
+        } else {
+            logger.info("[Utilis] Dynmap plugin found.");
         }
         DynmapManager dynmapManager = new DynmapManager(dynmapPlugin, logger);
         // Anti-Spam Manager setup

@@ -7,6 +7,8 @@ messages:
     join: '%player% joined the game.'
 sleeping:
     night-skip: "%player% took a little nap.... It is now morning!"
+custom-messages:
+    player: 'CUSTOM MESSAGE'
 list:
     playerCountMessage: '&9There are &c%playernumber% &9out of a maximum &c%max% &9players.'
     onlineMessage: 'Connected Players: %players%'
@@ -16,7 +18,7 @@ nickname:
 color:
     set: '&7Your color has been changed to %color%'
     invalid: '&cInvalid color.'
-Version: 1.1
+Version: 1.2
 #--------------------------------------------------------------------------------------------
 #Colors:                #Placeholders:  
 # "&0" = BLACK          # %player% = Name of player.

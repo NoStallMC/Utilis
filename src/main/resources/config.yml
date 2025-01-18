@@ -14,6 +14,7 @@ features:
   motd: true
   qol: true
   night-skip: true
+  custom-sleep-message: true
   nickname-length: 16
   chat-formatting: true
   minecartdmg-fix: true
@@ -22,4 +23,4 @@ anti-spam:
   enabled: true
   message-limit: 10
   time-window: 10
-Version: 2.0
+Version: 2.1

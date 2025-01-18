@@ -8,3 +8,4 @@ depend.txt
 .externalToolBuilders/New_Builder.launch
 build.xml
 /target
+bconfig.yml
