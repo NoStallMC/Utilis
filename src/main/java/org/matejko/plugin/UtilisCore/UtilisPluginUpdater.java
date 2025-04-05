@@ -6,55 +6,58 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
+import main.java.org.matejko.plugin.Utilis;
 import main.java.org.matejko.plugin.FileCreator.Config;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.logging.Logger;
 
 public class UtilisPluginUpdater implements Listener {
-
     private static final String UTILIS_PLUGIN_NAME = "Utilis";
     private static final String GITHUB_RELEASE_URL = "https://api.github.com/repos/NoStallMC/Utilis/releases/latest";
     private static final String DOWNLOAD_URL = "https://github.com/NoStallMC/Utilis/releases/download/%s/Utilis.jar";
-    private static final Logger logger = Bukkit.getLogger();
     private Plugin plugin;
+    private Utilis p;
     private Config config;
 
     public UtilisPluginUpdater(Plugin plugin, Config config) {
         this.plugin = plugin;
+        this.p = (Utilis) plugin;
         this.config = config;
     }
+
     public void checkForUpdates() {
-        logger.info("[Utilis] Checking for updates...");
+        p.getLogger().info("[Utilis] Checking for updates...");
         Bukkit.getScheduler().scheduleAsyncDelayedTask(plugin, this::checkAndUpdatePlugin, 100L);
     }
+
     private void checkAndUpdatePlugin() {
         Bukkit.getScheduler().scheduleAsyncDelayedTask(plugin, () -> {
             try {
                 String latestVersion = getLatestVersionFromGitHub();
                 String currentVersion = getCurrentPluginVersion();
                 if (latestVersion == null) {
-                    logger.severe("[Utilis] Failed to fetch the latest version from GitHub.");
+                    p.getLogger().severe("[Utilis] Failed to fetch the latest version from GitHub.");
                     return;
                 }
-                logger.info("[Utilis] Current Version: " + currentVersion);
-                logger.info("[Utilis] Latest Version on GitHub: " + latestVersion);
+                p.getLogger().info("[Utilis] Current Version: " + currentVersion);
+                p.getLogger().info("[Utilis] Latest Version on GitHub: " + latestVersion);
 
                 if (isUpdateAvailable(currentVersion, latestVersion)) {
-                    logger.warning("[Utilis] is outdated!");
+                    p.getLogger().warning("[Utilis] is outdated!");
                     downloadAndNotifyUpdate(latestVersion);
                 } else {
-                    logger.info("[Utilis] is up to date!");
+                    p.getLogger().info("[Utilis] is up to date!");
                 }
             } catch (Exception e) {
-                logger.severe("[Utilis] Error during update check: " + e.getMessage());
+                p.getLogger().severe("[Utilis] Error during update check: " + e.getMessage());
                 e.printStackTrace();
             }
         });
     }
+
     private String getLatestVersionFromGitHub() throws IOException {
         HttpURLConnection connection = (HttpURLConnection) new URL(GITHUB_RELEASE_URL).openConnection();
         connection.setRequestMethod("GET");
@@ -67,13 +70,16 @@ public class UtilisPluginUpdater implements Listener {
         }
         throw new IOException("[Utilis] Failed to fetch version. Response code: " + connection.getResponseCode());
     }
+
     private String getCurrentPluginVersion() {
         Plugin plugin = Bukkit.getPluginManager().getPlugin(UTILIS_PLUGIN_NAME);
         return plugin != null ? plugin.getDescription().getVersion() : null;
     }
+
     private boolean isUpdateAvailable(String currentVersion, String latestVersion) {
         return currentVersion != null && !currentVersion.equals(latestVersion);
     }
+
     private void downloadAndNotifyUpdate(String latestVersion) throws IOException {
         String downloadUrl = String.format(DOWNLOAD_URL, latestVersion);
         HttpURLConnection connection = (HttpURLConnection) new URL(downloadUrl).openConnection();
@@ -93,7 +99,7 @@ public class UtilisPluginUpdater implements Listener {
                     outputStream.write(buffer, 0, bytesRead);
                 }
             }
-            logger.info("[Utilis] New update downloaded to Utilis folder.");
+            p.getLogger().info("[Utilis] New update downloaded to Utilis folder.");
             if (isUpdateAvailable(getCurrentPluginVersion(), latestVersion)) {
                 warnOPs(ChatColor.RED + "[Utilis] is outdated! A new update has been downloaded to the Utilis folder.");
             }
@@ -101,6 +107,7 @@ public class UtilisPluginUpdater implements Listener {
             throw new IOException("[Utilis] Failed to download new plugin. Response code: " + connection.getResponseCode());
         }
     }
+
     private void warnOPs(String message) {
         for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
             if (player.isOp()) {
@@ -108,6 +115,7 @@ public class UtilisPluginUpdater implements Listener {
             }
         }
     }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (event.getPlayer().isOp() && config.isUpdateEnabled()) {
@@ -122,6 +130,7 @@ public class UtilisPluginUpdater implements Listener {
             }
         }
     }
+
     public void registerListener() {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }

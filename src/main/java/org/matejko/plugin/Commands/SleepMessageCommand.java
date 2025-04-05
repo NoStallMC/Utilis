@@ -40,7 +40,8 @@ public class SleepMessageCommand implements CommandExecutor {
                     }
                     String message = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
                     messages.setCustomSleepMessage(p, message);
-                    p.sendMessage(ChatColor.GREEN + "Your custom sleep message has been set!");
+                    p.sendMessage(ChatColor.GREEN + "Your custom sleep message has been set to:");
+                    p.sendMessage(message);
                 } else {
                     p.sendMessage(ChatColor.RED + "You do not have permission to set a custom sleep message.");
                 }

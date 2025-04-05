@@ -76,8 +76,9 @@ public class NickManager implements Listener {
         }
     }
     public boolean isNicknameUsed(String nickname) {
+        String lowerCaseNickname = nickname.toLowerCase();
         for (String[] data : playerData.values()) {
-            if (data[0].equals(nickname)) {
+            if (data[0].toLowerCase().equals(lowerCaseNickname)) {
                 return true;
             }
         }
