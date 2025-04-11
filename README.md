@@ -24,6 +24,7 @@ From managing nicknames to toggling vanish mode, Utilis is designed to simplify 
 |----------------|-------------------------------------------------------------------|--------------------------------|----------|
 | `/vanish`      | Toggles vanish mode for the player.                               | `/v, /v s/silent, /v player`   | `/v`     |
 | `/list`        | Lists all connected players.                                      | `/list`                        | -        |
+| `/whitelist`   | Toggles functionality of whitelist.                               | `/wl`                          | -/wl     |
 | `/nickname`    | Set or change your nickname.                                      | `/nickname <nickname>`         | -        |
 | `/rename`      | Rename another player (admin command).                            | `/rename <player> <nickname>`  | -        |
 | `/color`       | Change your nickname color.                                       | `/color <color>`               | -        |
@@ -36,23 +37,28 @@ From managing nicknames to toggling vanish mode, Utilis is designed to simplify 
 | `/isee`        | View and edit another player's inventory.                         | `/isee <player>`               | -        |
 | `/recover`     | Recover a player's inventory after they die.                      | `/recover <player>`            | -        |
 
-### Permissions
+### Lot of permissions!
 
-| Permission          | Description                                       | Default |
-|---------------------|---------------------------------------------------|---------|
-| `utilis.debug`      | Allows access to the `/utilisdebug` command.      | `op`    |
-| `utilis.sudo`       | Allows use of the `/sudo` command.                | `op`    |
-| `utilis.nickname`   | Allows setting a nickname.                        | `true`  |
-| `utilis.rename`     | Allows renaming other players.                    | `op`    |
-| `utilis.color`      | Allows changing nickname color.                   | `true`  |
-| `utilis.nickreset`  | Allows resetting your nickname.                   | `true`  |
-| `utilis.realname`   | Allows retrieving the real name of a player.      | `true`  |
-| `utilis.list`       | Allows listing all online players.                | `true`  |
-| `utilis.suck`       | Allows teleporting all items to the player.       | `op`    |
-| `utilis.vanish`     | Allows toggling vanish mode.                      | `op`    |
-| `utilis.sleep`      | Allows using the `/ns` command.                   | `op`    |
-| `utilis.isee`       | Allows using the `/isee` command.                 | `op`    |
-| `utilis.recover`    | Allows using the `/recover` command.              | `op`    |
+| Permission               | Description                                       | Default |
+|--------------------------|---------------------------------------------------|---------|
+| `utilis.debug`           | Allows access to the `/utilisdebug` command.      | `op`    |
+| `utilis.sudo`            | Allows use of the `/sudo` command.                | `op`    |
+| `utilis.nickname`        | Allows setting a nickname.                        | `true`  |
+| `utilis.rename`          | Allows renaming other players.                    | `op`    |
+| `utilis.color`           | Allows changing nickname color.                   | `true`  |
+| `utilis.nickreset`       | Allows resetting your nickname.                   | `true`  |
+| `utilis.realname`        | Allows retrieving the real name of a player.      | `true`  |
+| `utilis.list`            | Allows listing all online players.                | `true`  |
+| `utilis.suck`            | Allows teleporting all items to the player.       | `op`    |
+| `utilis.vanish`          | Allows toggling vanish mode.                      | `op`    |
+| `utilis.sleep`           | Allows using the `/ns` command.                   | `op`    |
+| `utilis.isee`            | Allows using the `/isee` command.                 | `op`    |
+| `utilis.recover`         | Allows using the `/recover` command.              | `op`    |
+| `utilis.whitelist.use`   | Allows the player to manage the whitelist         | `op`    |
+| `utilis.whitelist.add`   | Allows the player to add to the whitelist         | `op`    |
+| `utilis.whitelist.remove`| Allows the player to remove from the whitelist    | `op`    |
+| `utilis.sm`              | Allows using the `/sleepmessage set` command      | `true`  |
+| `utilis.sm.admin`        | Allows using the `/sleepmessage edit/remove` command  | `op`    |
 
 ### Installation
 
