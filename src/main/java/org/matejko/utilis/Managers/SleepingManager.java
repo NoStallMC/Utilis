@@ -23,6 +23,7 @@ public class SleepingManager implements Listener {
     private Config config;
 
     public SleepingManager(Utilis plugin, Config config) {
+    	this.plugin = plugin;
     	this.config = config;
         this.worldConfig = new SleepingWorldConfig();
         this.sleepingPlayers = new ConcurrentHashMap<>();
