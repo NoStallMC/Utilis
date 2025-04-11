@@ -1,0 +1,6 @@
+whitelist-enabled: true
+kick-message: "Join Discord to get Whitelisted!"
+allowed-players:
+  - player1
+  - player2
+

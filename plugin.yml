@@ -1,6 +1,6 @@
 author: matejkoo
 description: Utilis plugin
-main: main.java.org.matejko.plugin.Utilis
+main: main.java.org.matejko.utilis.Utilis
 name: Utilis
 version: V2.2.3
 commands:
@@ -13,13 +13,18 @@ commands:
     description: List connected players.
     usage: /list
     permission-message: You do not have permission to use this command.
+  whitelist:
+    description: Manage the server whitelist
+    usage: /<command>
+    aliases: [wl]
+    permission-message: You do not have permission to use this command.
   nickname:
     description: Set or change your nickname.
-    usage: /nickname <nickname>
+    #usage: /nickname <nickname>
     permission-message: You do not have permission to use this command.
   rename:
     description: Rename another player (admin command).
-    usage: /rename <player> <nickname>
+    #usage: /rename <player> <nickname>
     permission-message: You do not have permission to use this command.
   color:
     description: Change your nickname color.
@@ -27,7 +32,7 @@ commands:
     permission-message: You do not have permission to use this command.
   realname:
     description: Returns the real name of a player based on their nickname.
-    usage: /realname <nickname>
+    #usage: /realname <nickname>
     permission-message: You do not have permission to use this command.
   nickreset:
     description: Reset your nickname to the original name.
@@ -90,6 +95,15 @@ permissions:
   utilis.list:
     description: Allows listing all online players.
     default: true
+  utilis.whitelist.use:
+    description: Allows the player to manage the whitelist
+    default: op
+  utilis.whitelist.add:
+    description: Allows the player to add to the whitelist
+    default: op
+  utilis.whitelist.remove:
+    description: Allows the player to remove from the whitelist
+    default: op
   utilis.suck:
     description: Allows teleporting all items to the player.
     default: op
