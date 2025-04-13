@@ -5,34 +5,39 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import main.java.org.matejko.utilis.Managers.NickManager;
+
 public class RenameCommand implements org.bukkit.command.CommandExecutor {
     private final NickManager nickManager;
-
     public RenameCommand(NickManager nickManager) {
         this.nickManager = nickManager;
     }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        Player player = (Player) sender;
         if (args.length < 2) {
-            player.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "Usage: /rename <player> <nickname>");
+            sender.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "Usage: /rename <player> <nickname>");
             return false;
         }
         String targetName = args[0];
         String newNickname = args[1];
         Player targetPlayer = getTargetPlayer(targetName);
         if (targetPlayer == null) {
-            player.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "Player with the name or nickname '" + targetName + "' not found.");
+            sender.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "Player with the name or nickname '" + targetName + "' not found.");
             return false;
         }
         if (!nickManager.isValidNickname(newNickname)) {
-            player.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "The nickname '" + "~" + newNickname + "' is already in use.");
+            sender.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "The nickname '" + "~" + newNickname + "' is already in use.");
             return false;
         }
         nickManager.setNickname(targetPlayer, newNickname);
-        String playerColor = nickManager.getPlayerColor(player);
-        player.sendMessage("§7[§2Utilis§7] " + ChatColor.GRAY + "You have renamed " + ChatColor.valueOf(playerColor.toUpperCase()) + targetPlayer.getName() + " to " + "~" + newNickname + ".");
-        targetPlayer.sendMessage("§7[§2Utilis§7] " + ChatColor.GRAY + "You have been renamed to " + ChatColor.valueOf(playerColor.toUpperCase()) + "~" + newNickname + ".");
+        String playerColor = ChatColor.GRAY.toString();
+        String sourceName = "console";
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+            playerColor = ChatColor.valueOf(nickManager.getPlayerColor(player).toUpperCase()).toString();
+            sourceName = player.getName();
+        }
+        sender.sendMessage("§7[§2Utilis§7] " + ChatColor.GRAY + "You have renamed " + playerColor + targetPlayer.getName() + ChatColor.GRAY + " to ~" + newNickname + ".");
+        targetPlayer.sendMessage("§7[§2Utilis§7] " + ChatColor.GRAY + "You have been renamed to " + playerColor + "~" + newNickname + ChatColor.GRAY + " by " + sourceName + ".");
         return true;
     }
     private Player getTargetPlayer(String targetName) {
