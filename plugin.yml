@@ -2,7 +2,7 @@ author: matejkoo
 description: Utilis plugin
 main: main.java.org.matejko.utilis.Utilis
 name: Utilis
-version: V2.2.4
+version: V2.2.5
 commands:
   vanish:
     description: Toggles vanish mode for the player.
@@ -52,6 +52,7 @@ commands:
     description: Sets custom sleep messages.
     #usage: /sleepmessage set <message>
     permission-message: You do not have permission to use this command.
+    aliases: [sm]
   utilisdebug:
     description: Runs a debug check for the plugin and outputs the status of critical components.
     usage: /utilisdebug

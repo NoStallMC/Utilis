@@ -1,6 +1,6 @@
 ## Utilis
 
-**Author**: matejkoo  
+**Author**: ~jkoo
 
 Utilis is a robust and feature-rich plugin for beta 1.7.3 servers, offering useful utilities and tools to enhance the multiplayer experience.
 From managing nicknames to toggling vanish mode, Utilis is designed to simplify server administration while adding fun things for players.
@@ -10,6 +10,7 @@ From managing nicknames to toggling vanish mode, Utilis is designed to simplify 
 - **Vanish**: Toggle invisibility to other players with `/vanish`.
 - **Nickname Management**: Set, reset, and customize player nicknames and colors.
 - **Night Skip**: Manage night-skip mechanics with `/ns`.
+- **SleepMessage**: Manage custom sleep messages with `/sm`.
 - **Inventory Management**: Use `/isee` to view and edit another player's inventory.
 - **Inventory Recovery**: Recover a player's inventory after death using /recover.
 - **Item Teleportation**: Instantly pull all nearby items with `/suck`.
@@ -32,6 +33,7 @@ From managing nicknames to toggling vanish mode, Utilis is designed to simplify 
 | `/nickreset`   | Resets your nickname to your original name.                       | `/nickreset`                   | -        |
 | `/suck`        | Teleports all items around you to you.                            | `/suck`                        | -        |
 | `/ns`          | Toggle sleeping mechanics in current world.                       | `/ns toggle`                   | `/ns t`  |
+| `/sm`          | Displays sleepmessages features.                                  | `/sleepmessage set <message>`  | `/sm`    |
 | `/utilisdebug` | Runs a debug check for the plugin.                                | `/utilisdebug`                 | -        |
 | `/sudo`        | Force a player to execute a command or send a chat message.       | `/sudo <player> <command>`     | -        |
 | `/isee`        | View and edit another player's inventory.                         | `/isee <player>`               | -        |

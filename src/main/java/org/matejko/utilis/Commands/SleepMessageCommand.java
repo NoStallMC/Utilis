@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import main.java.org.matejko.utilis.Utilis;
 import main.java.org.matejko.utilis.FileCreator.Messages;
+import main.java.org.matejko.utilis.Managers.ColorUtil;
 
 public class SleepMessageCommand implements CommandExecutor {
     private final Messages messages;
@@ -30,6 +31,43 @@ public class SleepMessageCommand implements CommandExecutor {
             sendHelpMessage(sender);
             return false;
         }
+        if (args[0].equalsIgnoreCase("reset")) {
+            if (!isPlayer) {
+                sender.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "Only players can reset their sleep message.");
+                return true;
+            }
+            messages.removeCustomSleepMessage(p.getName());
+            p.sendMessage("§7[§2Utilis§7] " + ChatColor.GREEN + "Your custom sleep message has been reset.");
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("preview")) {
+            if (!isPlayer) {
+                sender.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "Only players can preview their sleep message.");
+                return true;
+            }
+            String raw = messages.getCustomSleepMessage(p.getName());
+            if (raw == null || raw.isEmpty()) {
+                p.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "You don't have a custom sleep message.");
+            } else {
+                String formatted = formatMessage(raw, p.getDisplayName());
+                p.sendMessage("§7[§2Utilis§7] " + ChatColor.GREEN + "Your custom sleep message: " + ChatColor.WHITE + formatted);
+            }
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("list")) {
+            HashMap<String, String> allMessages = messages.getAllCustomSleepMessages();
+            if (allMessages.isEmpty()) {
+                sender.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "No custom sleep messages found.");
+            } else {
+                sender.sendMessage("§7[§2Utilis§7] " + ChatColor.GREEN + "Custom sleep messages:");
+                for (String playerName : allMessages.keySet()) {
+                    String message = allMessages.get(playerName);
+                    sender.sendMessage("§7[§2Utilis§7] " + ChatColor.YELLOW + playerName + ": " + ChatColor.WHITE + message);
+                }
+            }
+            return true;
+        }
         if (args[0].equalsIgnoreCase("set")) {
             if (isPlayer) {
                 if (!p.hasPermission("utilis.sm")) {
@@ -43,7 +81,7 @@ public class SleepMessageCommand implements CommandExecutor {
                 String message = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
                 messages.setCustomSleepMessage(p, message);
                 p.sendMessage("§7[§2Utilis§7] " + ChatColor.GREEN + "Your custom sleep message has been set to:");
-                p.sendMessage(message);
+                p.sendMessage(ChatColor.WHITE + formatMessage(message, p.getDisplayName()));
             } else {
                 sender.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "The console cannot set a custom sleep message.");
             }
@@ -70,12 +108,11 @@ public class SleepMessageCommand implements CommandExecutor {
                 if (message == null || message.isEmpty()) {
                     sender.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "No custom message found for " + targetPlayer.getName());
                 } else {
-                    editingPlayerMap.put(p, targetPlayer.getName()); // Store the player being edited
+                    editingPlayerMap.put(p, targetPlayer.getName()); 
                     sender.sendMessage("§7[§2Utilis§7] " + ChatColor.GREEN + targetPlayer.getName() + "'s current custom message: " + ChatColor.WHITE + message);
-                    sender.sendMessage("§7[§2Utilis§7] " + ChatColor.YELLOW + "Use /sleepmessage new <new message> to set a new message for " + targetPlayer.getName());
+                    sender.sendMessage("§7[§2Utilis§7] " + ChatColor.YELLOW + "Use /sm new <new message> to set a new message for " + targetPlayer.getName());
                 }
             } else {
-                // If multiple matches, list them
                 sender.sendMessage("§7[§2Utilis§7] " + ChatColor.YELLOW + "Multiple players match your input. Please be more specific.");
                 for (Player matchedPlayer : matchedPlayers) {
                     sender.sendMessage(ChatColor.GOLD + "- " + matchedPlayer.getDisplayName());
@@ -89,7 +126,7 @@ public class SleepMessageCommand implements CommandExecutor {
                 return false;
             }
             if (!(sender instanceof ConsoleCommandSender) && !editingPlayerMap.containsKey(p)) {
-                p.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "You are not editing any player's message. Use /sleepmessage edit <playername> first.");
+                p.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "You are not editing any player's message. Use /sm edit <playername> first.");
                 return false;
             }
             if (args.length < 2) {
@@ -134,6 +171,9 @@ public class SleepMessageCommand implements CommandExecutor {
         }
         return false;
     }
+    private String formatMessage(String rawMessage, String playerName) {
+        return ColorUtil.translateColorCodes(rawMessage.replace("%player%", playerName));
+    }
     private List<Player> getMatchedPlayers(String searchName) {
         List<Player> matchedPlayers = new ArrayList<>();
         Player[] onlinePlayers = Bukkit.getServer().getOnlinePlayers();
@@ -148,22 +188,30 @@ public class SleepMessageCommand implements CommandExecutor {
         if (sender instanceof Player) {
             Player p = (Player) sender;
             if (p.hasPermission("utilis.sm.admin")) {
-                p.sendMessage(ChatColor.GREEN + "Correct usage:");
-                p.sendMessage(ChatColor.GOLD + "/sleepmessage set <message>" + ChatColor.WHITE + " to set your custom message.");
-                p.sendMessage(ChatColor.GOLD + "/sleepmessage edit <playername>" + ChatColor.WHITE + " to edit a player's custom message.");
-                p.sendMessage(ChatColor.GOLD + "/sleepmessage new <new message>" + ChatColor.WHITE + " to set a new message for the player being edited.");
-                p.sendMessage(ChatColor.GOLD + "/sleepmessage remove <playername>" + ChatColor.WHITE + " to remove a player's custom message.");
+                p.sendMessage("§7[§2Utilis§7] " + ChatColor.GREEN + "Correct usage:");
+                p.sendMessage(ChatColor.GOLD + "/sm set <message>" + ChatColor.WHITE + " to set your custom message.");
+                p.sendMessage(ChatColor.GOLD + "/sm preview" + ChatColor.WHITE + " to preview your sleep message.");
+                p.sendMessage(ChatColor.GOLD + "/sm reset" + ChatColor.WHITE + " to reset your sleep message.");
+                p.sendMessage(ChatColor.GOLD + "/sm edit <playername>" + ChatColor.WHITE + " to edit a player's custom message.");
+                p.sendMessage(ChatColor.GOLD + "/sm list <playername>" + ChatColor.WHITE + " to view all custom messages.");     
+                p.sendMessage(ChatColor.GOLD + "/sm new <new message>" + ChatColor.WHITE + " to set a new message for the player being edited.");
+                p.sendMessage(ChatColor.GOLD + "/sm remove <playername>" + ChatColor.WHITE + " to remove a player's custom message.");
+                p.sendMessage(ChatColor.GRAY + "BTW you can use %player% to add your name!");
             } else if (p.hasPermission("utilis.sm")) {
-                p.sendMessage(ChatColor.GREEN + "Correct usage:");
-                p.sendMessage(ChatColor.GOLD + "/sleepmessage set <message>" + ChatColor.WHITE + " to set your custom sleep message.");
+                p.sendMessage("§7[§2Utilis§7] " + ChatColor.GREEN + "Correct usage:");
+                p.sendMessage(ChatColor.GOLD + "/sm set <message>" + ChatColor.WHITE + " to set your custom sleep message.");
+                p.sendMessage(ChatColor.GOLD + "/sm preview" + ChatColor.WHITE + " to preview your sleep message.");
+                p.sendMessage(ChatColor.GOLD + "/sm reset" + ChatColor.WHITE + " to reset your sleep message.");
+                p.sendMessage(ChatColor.GRAY + "BTW you can use %player% to add your name!");
             } else {
                 p.sendMessage(ChatColor.RED + "You do not have permission to use this command.");
             }
         } else {
-            sender.sendMessage("[Utilis] " + ChatColor.YELLOW + "Correct usage:");
-            sender.sendMessage(ChatColor.GOLD + "/sleepmessage edit <playername>" + ChatColor.WHITE + " to edit a player's custom message.");
-            sender.sendMessage(ChatColor.GOLD + "/sleepmessage new <new message>" + ChatColor.WHITE + " to set a new message for the player being edited.");
-            sender.sendMessage(ChatColor.GOLD + "/sleepmessage remove <playername>" + ChatColor.WHITE + " to remove a player's custom message.");
+            sender.sendMessage("§7[§2Utilis§7] " + ChatColor.GREEN + "Correct usage:");
+            sender.sendMessage(ChatColor.GOLD + "/sm edit <playername>" + ChatColor.WHITE + " to edit a player's custom message.");
+            sender.sendMessage(ChatColor.GOLD + "/sm list <playername>" + ChatColor.WHITE + " to view all custom message.");     
+            sender.sendMessage(ChatColor.GOLD + "/sm new <new message>" + ChatColor.WHITE + " to set a new message for the player being edited.");
+            sender.sendMessage(ChatColor.GOLD + "/sm remove <playername>" + ChatColor.WHITE + " to remove a player's custom message.");
         }
     }
 }

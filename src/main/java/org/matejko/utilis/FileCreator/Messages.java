@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.config.Configuration;
 import main.java.org.matejko.utilis.Utilis;
 import java.io.*;
+import java.util.HashMap;
 
 public class Messages {
     private Utilis plugin;
@@ -19,7 +20,6 @@ public class Messages {
     private void setup() {
         messagesFile = new File(plugin.getDataFolder(), "messages.yml");
         whitelistFile = new File(plugin.getDataFolder(), "whitelist.yml");
-
         if (!messagesFile.exists()) {
             try {
                 copyFromJar("messages.yml", messagesFile);
@@ -28,7 +28,6 @@ public class Messages {
                 plugin.getLogger().warning("[Utilis] Error copying messages.yml from JAR: " + e.getMessage());
             }
         }
-
         if (!whitelistFile.exists()) {
             try {
                 copyFromJar("whitelist.yml", whitelistFile);
@@ -37,7 +36,6 @@ public class Messages {
                 plugin.getLogger().warning("[Utilis] Error copying whitelist.yml from JAR: " + e.getMessage());
             }
         }
-
         // Load the messages config
         messagesConfig = new Configuration(messagesFile);
         messagesConfig.load();
@@ -107,6 +105,17 @@ public class Messages {
             return true;
         }
         return false;
+    }
+    
+    public HashMap<String, String> getAllCustomSleepMessages() {
+        HashMap<String, String> customMessages = new HashMap<>();
+        for (String key : messagesConfig.getKeys("custom-messages")) {
+            String message = messagesConfig.getString("custom-messages." + key);
+            if (message != null) {
+                customMessages.put(key, message);
+            }
+        }
+        return customMessages;
     }
 
     public File getMessagesFile() {
