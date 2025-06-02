@@ -82,7 +82,7 @@ public class VanishCommand implements CommandExecutor {
             for (Player target : Bukkit.getOnlinePlayers()) {
                 target.hidePlayer(player);
                 // Only show player to those with the permission
-                if (config.isOpSeeVanishEnabled() && target.hasPermission("utilis.vanish")) {
+                if (!silent && config.isOpSeeVanishEnabled() && target.hasPermission("utilis.vanish")) {
                     target.showPlayer(player);
                 }
             }
