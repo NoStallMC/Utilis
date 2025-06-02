@@ -2,6 +2,7 @@ package main.java.org.matejko.utilis;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import main.java.org.matejko.utilis.FileCreator.*;
+import main.java.org.matejko.utilis.Managers.SleepingManager;
 import main.java.org.matejko.utilis.UtilisCore.*;
 import org.bukkit.event.Listener;
 import java.util.logging.Logger;
@@ -10,7 +11,8 @@ public class Utilis extends JavaPlugin implements Listener {
     private Logger logger;
     private Config config;
     private UtilisGetters utilisGetters;
-	@Override
+
+    @Override
     public void onEnable() {
         this.logger = Logger.getLogger("Utilis");
         getLogger().info("[Utilis] is starting up!");
@@ -37,5 +39,8 @@ public class Utilis extends JavaPlugin implements Listener {
     }
     public void setUtilisGetters(UtilisGetters utilisGetters) {
         this.utilisGetters = utilisGetters;
+    }
+    public SleepingManager getSleepingManager() {
+        return utilisGetters != null ? utilisGetters.getSleepingManager() : null;
     }
 }

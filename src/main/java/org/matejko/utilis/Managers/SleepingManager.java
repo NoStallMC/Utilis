@@ -21,10 +21,17 @@ public class SleepingManager implements Listener {
     private final Messages messages;
     private Utilis plugin;
     private Config config;
+    
+    // Listener interface to notify when sleep message is sent
+    public interface SleepMessageListener {
+        void onSleepMessage(String message);
+    }
+    // Registered listeners list
+    private final List<SleepMessageListener> sleepMessageListeners = new ArrayList<>();
 
     public SleepingManager(Utilis plugin, Config config) {
-    	this.plugin = plugin;
-    	this.config = config;
+        this.plugin = plugin;
+        this.config = config;
         this.worldConfig = new SleepingWorldConfig();
         this.sleepingPlayers = new ConcurrentHashMap<>();
         this.nightSkipped = new ConcurrentHashMap<>();
@@ -94,6 +101,10 @@ public class SleepingManager implements Listener {
                 }
                 messageTemplate = messageTemplate.replace("%player%", player.getDisplayName());
                 messageTemplate = ColorUtil.translateColorCodes(messageTemplate);
+                
+                for (SleepMessageListener listener : sleepMessageListeners) {
+                    listener.onSleepMessage(messageTemplate);
+                }
                 for (Player p : world.getPlayers()) {
                     p.sendMessage(messageTemplate);
                 }
@@ -114,5 +125,13 @@ public class SleepingManager implements Listener {
     }
     public void setCustomSleepMessage(Player player, String message) {
         messages.setCustomSleepMessage(player, message);
+    }
+    public void addSleepMessageListener(SleepMessageListener listener) {
+        if (!sleepMessageListeners.contains(listener)) {
+            sleepMessageListeners.add(listener);
+        }
+    }
+    public void removeSleepMessageListener(SleepMessageListener listener) {
+        sleepMessageListeners.remove(listener);
     }
 }
