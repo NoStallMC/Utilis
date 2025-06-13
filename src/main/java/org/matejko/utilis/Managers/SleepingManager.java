@@ -24,7 +24,7 @@ public class SleepingManager implements Listener {
     
     // Listener interface to notify when sleep message is sent
     public interface SleepMessageListener {
-        void onSleepMessage(String message);
+    	void onSleepMessage(Player sleeper, String message);
     }
     // Registered listeners list
     private final List<SleepMessageListener> sleepMessageListeners = new ArrayList<>();
@@ -103,7 +103,7 @@ public class SleepingManager implements Listener {
                 messageTemplate = ColorUtil.translateColorCodes(messageTemplate);
                 
                 for (SleepMessageListener listener : sleepMessageListeners) {
-                    listener.onSleepMessage(messageTemplate);
+                    listener.onSleepMessage(player, messageTemplate);
                 }
                 for (Player p : world.getPlayers()) {
                     p.sendMessage(messageTemplate);
