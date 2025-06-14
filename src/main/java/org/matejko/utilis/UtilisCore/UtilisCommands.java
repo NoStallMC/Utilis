@@ -24,7 +24,7 @@ public class UtilisCommands {
         this.nickManager = nickManager;
         this.cooldownManager = cooldownManager;
         this.messages = messages;
-        whitelistCommand = new WhitelistCommand(plugin, config);
+        whitelistCommand = new WhitelistCommand(plugin, config, messages);
     }
     public void registerCommands() {
         // Register commands with permission checks
@@ -32,31 +32,31 @@ public class UtilisCommands {
             registerCommandWithPermission("nickname", "utilis.nickname", new NicknameCommand(nickManager, cooldownManager, messages, config));
         }
         if (config.isRenameEnabled()) {
-            registerCommandWithPermission("rename", "utilis.rename", new RenameCommand(nickManager));
+            registerCommandWithPermission("rename", "utilis.rename", new RenameCommand(nickManager, messages));
         }
         if (config.isColorEnabled()) {
             registerCommandWithPermission("color", "utilis.color", new ColorCommand(nickManager, cooldownManager, messages));
         }
         if (config.isNickResetEnabled()) {
-            registerCommandWithPermission("nickreset", "utilis.nickreset", new NickResetCommand(nickManager, cooldownManager));
+            registerCommandWithPermission("nickreset", "utilis.nickreset", new NickResetCommand(nickManager, cooldownManager, messages));
         }
         if (config.isRealNameEnabled()) {
-            registerCommandWithPermission("realname", "utilis.realname", new RealNameCommand(nickManager));
+            registerCommandWithPermission("realname", "utilis.realname", new RealNameCommand(nickManager, messages));
         }
         if (config.isListEnabled()) {
             registerCommandWithPermission("list", "utilis.list", new ListCommand(plugin, config));
         }
         registerCommandWithPermission("utilisdebug", "utilis.debug", new UtilisDebugCommand(plugin));
-        registerCommandWithPermission("sudo", "utilis.sudo", new SudoManager());
-        registerCommandWithPermission("suck", "utilis.suck", new SuckCommand());
+        registerCommandWithPermission("sudo", "utilis.sudo", new SudoManager(messages));
+        registerCommandWithPermission("suck", "utilis.suck", new SuckCommand(messages));
         if (config.isVanishEnabled()) {
-            VanishCommand vanishCommand = new VanishCommand(plugin, config);
+            VanishCommand vanishCommand = new VanishCommand(plugin, config, messages);
             registerCommandWithPermission("vanish", "utilis.vanish", vanishCommand);
             registerCommandWithPermission("v", "utilis.vanish", vanishCommand);
         }
         // Register the RecoverCommand with the plugin and pass the RecoverManager
         RecoverManager recoverManager = new RecoverManager(plugin);
-        plugin.getCommand("recover").setExecutor(new RecoverCommand(recoverManager));
+        plugin.getCommand("recover").setExecutor(new RecoverCommand(recoverManager, messages));
         // Register ISee Command
         ISeeManager iSeeManager = UtilisGetters.getISeeManager();
         ISeeInventoryListener iSeeInventoryListener = new ISeeInventoryListener(plugin, iSeeManager);
@@ -71,7 +71,7 @@ public class UtilisCommands {
                 }
                 Player player = (Player) sender;
                 if (!player.hasPermission("utilis.isee")) {
-                    player.sendMessage("§7[§2Utilis§7] " + "§cYou do not have permission to use this command.");
+                    player.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + "§cYou do not have permission to use this command."));
                     return true;
                 }
                 new ISeeCommand(
@@ -102,7 +102,7 @@ public class UtilisCommands {
                 if (sender instanceof Player) {
                     Player player = (Player) sender;
                     if (!player.hasPermission(permission)) {
-                        player.sendMessage("§7[§2Utilis§7] " + "§cYou do not have permission to use this command.");
+                        player.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + "§cYou do not have permission to use this command."));
                         return true;
                     }
                 }

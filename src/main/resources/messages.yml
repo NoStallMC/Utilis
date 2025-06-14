@@ -13,12 +13,14 @@ list:
     playerCountMessage: '&9There are &c%playernumber% &9out of a maximum &c%max% &9players.'
     onlineMessage: 'Connected Players: %players%'
 nickname:
-    used: '&7[&2Utilis&7] &cThis nickname is already in use.'
-    set: '&7[&2Utilis&7] &7Your nickname has been set to %nickname%'
-color:
-    set: '&7[&2Utilis&7] &7Your color has been changed to %color%'
+    used: '&cThis nickname is already in use.'
+    set: '&7Your nickname has been set to %nickname%'
+color:        
+    set: '&7Your color has been changed to %color%'
+    usage: '&cUsage: /color <color> or /color help'
     invalid: '&cInvalid color.'
-Version: 1.2
+commands-prefix: "&7[&2Utilis&7]&f "
+Version: 1.3
 #--------------------------------------------------------------------------------------------
 #Colors:                #Placeholders:  
 # "&0" = BLACK          # %player% = Name of player.

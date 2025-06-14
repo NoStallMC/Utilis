@@ -35,20 +35,20 @@ public class NicknameCommand implements org.bukkit.command.CommandExecutor {
         Player player = (Player) sender;
         if (cooldownManager.isOnNicknameCooldown(player)) {
             long remaining = cooldownManager.getRemainingNicknameCooldown(player);
-            String cooldownMessage = "§7[§2Utilis§7] " + ChatColor.RED + "You must wait " + remaining + " seconds before using /nickname again.";
+            String cooldownMessage = ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.RED + "You must wait " + remaining + " seconds before using /nickname again.");
             player.sendMessage(cooldownMessage);
             return false;
         }
         // If no nickname is provided
         if (args.length == 0) {
-            player.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "Usage: /nickname <nickname>");
+            player.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.RED + "Usage: /nickname <nickname>"));
             return false;
         }
         // Check nickname length
         String nickname = args[0];
         int maxNicknameLength = config.maxNicknameLength();
         if (maxNicknameLength > 0 && nickname.length() > maxNicknameLength) {
-            player.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "The nickname is too long. Maximum allowed length is " + maxNicknameLength + " characters.");
+            player.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.RED + "The nickname is too long. Maximum allowed length is " + maxNicknameLength + " characters."));
             return false;
         }
         // Check if the nickname is available
@@ -56,9 +56,9 @@ public class NicknameCommand implements org.bukkit.command.CommandExecutor {
             String nicknameUsedMessage = messages.getMessage("nickname.used");
             if (nicknameUsedMessage == null) {
                 logger.warning("[Utilis] Message 'nickname.used' is null. Please check your messages config.");
-                nicknameUsedMessage = "§7[§2Utilis§7] " + "That nickname is already in use.";
+                nicknameUsedMessage = messages.getMessage("commands-prefix") + "That nickname is already in use.";
             }
-            player.sendMessage(formatMessage(nicknameUsedMessage, player, nickname));
+            player.sendMessage(ColorUtil.translateColorCodes(formatMessage(nicknameUsedMessage, player, nickname)));
             return false;
         }
         // Set the player's nickname
@@ -74,7 +74,7 @@ public class NicknameCommand implements org.bukkit.command.CommandExecutor {
         String nicknameSetMessage = messages.getMessage("nickname.set");
         if (nicknameSetMessage == null) {
             logger.warning("[Utilis] Message 'nickname.set' is null. Please check your messages config.");
-            nicknameSetMessage = "§7[§2Utilis§7] " + "&7Your nickname has been set to: %nickname%";
+            nicknameSetMessage = messages.getMessage("commands-prefix") + "&7Your nickname has been set to: %nickname%";
         }
         player.sendMessage(formatMessage(nicknameSetMessage, player, nickname));
         return true;

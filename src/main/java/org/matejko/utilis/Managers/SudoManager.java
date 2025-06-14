@@ -6,24 +6,30 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import main.java.org.matejko.utilis.FileCreator.Messages;
 
 public class SudoManager implements CommandExecutor {
+    private final Messages messages;
+
+    public SudoManager(Messages messages) {
+        this.messages = messages;
+    }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!label.equalsIgnoreCase("sudo")) {
             return false;
         }
         if (!sender.hasPermission("utilis.sudo")) {
-            sendError(sender,"§7[§2Utilis§7] " +  "You do not have permission to use this command.");
+            sendError(sender, messages.getMessage("commands-prefix") + ChatColor.RED + "You do not have permission to use this command.");
             return true;
         }
         if (args.length < 2) {
-            sender.sendMessage("§7[§2Utilis§7] " + "Usage: /sudo <player> <command/message>");
+            sender.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.RED + "Usage: /sudo <player> <command/message>"));
             return true;
         }
         Player target = findPlayer(args[0]);
         if (target == null) {
-            sendError(sender, "§7[§2Utilis§7] " + "Player not found: " + ChatColor.WHITE + args[0]);
+            sendError(sender,  messages.getMessage("commands-prefix")+ "Player not found: " + ChatColor.WHITE + args[0]);
             return true;
         }
         StringBuilder messageBuilder = new StringBuilder();
@@ -35,13 +41,13 @@ public class SudoManager implements CommandExecutor {
         if (message.startsWith("/")) {
             boolean success = Bukkit.dispatchCommand(target, message.substring(1));
             if (success) {
-                sendSuccess(sender,"§7[§2Utilis§7] " + ChatColor.GRAY + "Forced " + target.getDisplayName() + ChatColor.GRAY + " to execute command: " + ChatColor.WHITE + message);
+                sendSuccess(sender, messages.getMessage("commands-prefix")+ ChatColor.GRAY + "Forced " + target.getDisplayName() + ChatColor.GRAY + " to execute command: " + ChatColor.WHITE + message);
             } else {
-                sendError(sender,"§7[§2Utilis§7] " +  "Failed to execute command: " + message);
+                sendError(sender, messages.getMessage("commands-prefix")+ ChatColor.RED + "Failed to execute command: " + message);
             }
         } else {
-            target.chat(message);
-            sendSuccess(sender,"§7[§2Utilis§7] " +  ChatColor.GRAY + "Forced " + target.getDisplayName() + ChatColor.GRAY + " to send message: "+ ChatColor.WHITE + message);
+            target.chat(ColorUtil.translateColorCodes(message));
+            sendSuccess(sender, messages.getMessage("commands-prefix")+  ChatColor.GRAY + "Forced " + target.getDisplayName() + ChatColor.GRAY + " to send message: "+ ChatColor.WHITE + message);
         }
         return true;
     }
@@ -55,9 +61,9 @@ public class SudoManager implements CommandExecutor {
         return null;
     }
     public static void sendError(CommandSender sender, String message) {
-        sender.sendMessage(ChatColor.RED + message);
+        sender.sendMessage(ColorUtil.translateColorCodes(ChatColor.RED + message));
     }
     public static void sendSuccess(CommandSender sender, String message) {
-        sender.sendMessage(message);
+        sender.sendMessage(ColorUtil.translateColorCodes(message));
     }
 }

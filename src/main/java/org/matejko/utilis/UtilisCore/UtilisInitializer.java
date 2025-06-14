@@ -19,9 +19,11 @@ public class UtilisInitializer {
 	@SuppressWarnings("unused")
 	private WhitelistCommand whitelistCommand;
     static ISeeManager iSeeManager;
+    private final Messages messages;
 
-    public UtilisInitializer(Utilis plugin) {
+    public UtilisInitializer(Utilis plugin, Messages messages) {
         this.plugin = plugin;
+        this.messages = messages;
     }
 
     public void initialize() {
@@ -58,7 +60,7 @@ public class UtilisInitializer {
         RecoverManager recoverManager = new RecoverManager(plugin);
         plugin.getServer().getPluginManager().registerEvents(recoverManager, plugin);
         recoverManager.saveUUIDMap();
-        plugin.getCommand("recover").setExecutor(new RecoverCommand(recoverManager));
+        plugin.getCommand("recover").setExecutor(new RecoverCommand(recoverManager, messages));
         if (config.isDebugEnabled()) plugin.getLogger().info("[Utilis] RecoverManager initialised.");
         // Initialize ISee
         ISeeManager iSeeManager = new ISeeManager(config);
@@ -97,15 +99,14 @@ public class UtilisInitializer {
             plugin.getLogger().info("[Utilis] VanishEntityEventListener registered.");
         }
         // NickManager and cooldown setup
-        NickManager nickManager = new NickManager(plugin, config);
-        Messages messages = new Messages(plugin);
+        NickManager nickManager = new NickManager(plugin, config, messages);
         CooldownManager cooldownManager = new CooldownManager(plugin, 15);
         Bukkit.getPluginManager().registerEvents(nickManager, plugin);
         if (config.isDebugEnabled()) {
             plugin.getLogger().info("[Utilis] NickManager and CooldownManager initialised.");
         }
         // UtilisNotifier setup
-        UtilisNotifier utilisNotifier = new UtilisNotifier(plugin, config);
+        UtilisNotifier utilisNotifier = new UtilisNotifier(plugin, config, messages);
         Bukkit.getPluginManager().registerEvents(utilisNotifier, plugin);
         if (config.isDebugEnabled()) {
             plugin.getLogger().info("[Utilis] UtilisNotifier setup complete.");
@@ -148,7 +149,7 @@ public class UtilisInitializer {
             sleepingManager = new SleepingManager(plugin, config);
             sleepingManager.loadConfiguration();
             Bukkit.getPluginManager().registerEvents(sleepingManager, plugin);
-            SleepingCommand sleepingCommand = new SleepingCommand(plugin, sleepingManager);
+            SleepingCommand sleepingCommand = new SleepingCommand(plugin, sleepingManager, messages);
             plugin.getCommand("sleepmessage").setExecutor(new SleepMessageCommand(plugin));
             plugin.getCommand("ns").setExecutor(sleepingCommand);
             plugin.getLogger().info("[Utilis] Sleeping is enabled.");
@@ -187,7 +188,7 @@ public class UtilisInitializer {
         }
         DynmapManager dynmapManager = new DynmapManager(dynmapPlugin, plugin.getLogger());
         // Whitelist stuff
-        whitelistCommand = new WhitelistCommand(plugin, config);
+        whitelistCommand = new WhitelistCommand(plugin, config, messages);
         new WhitelistManager(plugin, config);
         WhitelistManager whitelistManager = new WhitelistManager(plugin, config);
         WhitelistJoinListener whitelistJoinManager = new WhitelistJoinListener(plugin, whitelistManager, plugin, config);

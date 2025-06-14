@@ -4,28 +4,33 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import main.java.org.matejko.utilis.FileCreator.Messages;
+import main.java.org.matejko.utilis.Managers.ColorUtil;
 import main.java.org.matejko.utilis.Managers.NickManager;
 
 public class RenameCommand implements org.bukkit.command.CommandExecutor {
     private final NickManager nickManager;
-    public RenameCommand(NickManager nickManager) {
+    private final Messages messages;
+
+    public RenameCommand(NickManager nickManager, Messages messages) {
+    	this.messages = messages;
         this.nickManager = nickManager;
     }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "Usage: /rename <player> <nickname>");
+            sender.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.RED + "Usage: /rename <player> <nickname>"));
             return false;
         }
         String targetName = args[0];
         String newNickname = args[1];
         Player targetPlayer = getTargetPlayer(targetName);
         if (targetPlayer == null) {
-            sender.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "Player with the name or nickname '" + targetName + "' not found.");
+            sender.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.RED + "Player with the name or nickname '" + targetName + "' not found."));
             return false;
         }
         if (!nickManager.isValidNickname(newNickname)) {
-            sender.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "The nickname '" + "~" + newNickname + "' is already in use.");
+            sender.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.RED + "The nickname '" + "~" + newNickname + "' is already in use."));
             return false;
         }
         nickManager.setNickname(targetPlayer, newNickname);
@@ -34,10 +39,10 @@ public class RenameCommand implements org.bukkit.command.CommandExecutor {
         if (sender instanceof Player) {
             Player player = (Player) sender;
             playerColor = ChatColor.valueOf(nickManager.getPlayerColor(player).toUpperCase()).toString();
-            sourceName = player.getName();
+            sourceName = player.getDisplayName();
         }
-        sender.sendMessage("§7[§2Utilis§7] " + ChatColor.GRAY + "You have renamed " + playerColor + targetPlayer.getName() + ChatColor.GRAY + " to ~" + newNickname + ".");
-        targetPlayer.sendMessage("§7[§2Utilis§7] " + ChatColor.GRAY + "You have been renamed to " + playerColor + "~" + newNickname + ChatColor.GRAY + " by " + sourceName + ".");
+        sender.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.GRAY + "You have renamed " + playerColor + targetPlayer.getName() + ChatColor.GRAY + " to ~" + newNickname + "."));
+        targetPlayer.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.GRAY + "You have been renamed to " + playerColor + "~" + newNickname + ChatColor.GRAY + " by " + sourceName + "."));
         return true;
     }
     private Player getTargetPlayer(String targetName) {

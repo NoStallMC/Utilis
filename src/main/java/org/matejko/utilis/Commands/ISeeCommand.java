@@ -72,7 +72,7 @@ public class ISeeCommand implements CommandExecutor {
             player.sendMessage("§7[§2Utilis§7] §cUsage: /isee <player>");
             return true;
         }
-        String inputName = args[0];
+        String inputName = args[0].toLowerCase();
         String normalized = inputName.toLowerCase();
         Player target = getTargetPlayer(normalized);
         if (target != null && target.isOnline()) {

@@ -61,7 +61,7 @@ public class ISeeOfflineEditor implements Listener {
         }
         ItemStack[] contents = viewer.getInventory().getContents();
         ItemStack[] armor = viewer.getInventory().getArmorContents();
-        recoverManager.saveInventoryToFile(targetName, targetUUID, contents, armor);
+        recoverManager.saveInventoryToFile(targetName, targetUUID, contents, armor, "NORMAL");
         offlineEditSession.remove(viewer.getUniqueId());
         restoreViewerInventory(viewer);
     }

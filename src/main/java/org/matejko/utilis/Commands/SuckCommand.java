@@ -7,15 +7,23 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import main.java.org.matejko.utilis.FileCreator.Messages;
+import main.java.org.matejko.utilis.Managers.ColorUtil;
 import org.bukkit.ChatColor;
 
 public class SuckCommand implements CommandExecutor {
+    private final Messages messages;
+
+    public SuckCommand(Messages messages) {
+        this.messages = messages;
+    }
+
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (cmd.getName().equalsIgnoreCase("suck")) {
             if (sender instanceof Player) {
                 Player player = (Player) sender;
                     teleportItemsToPlayer(player);
-                    player.sendMessage("§7[§2Utilis§7] " + ChatColor.GRAY + "All dropped items have been teleported to you!");
+                    player.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.GRAY + "All dropped items have been teleported to you!"));
                 }
              else {
                sender.sendMessage("Only players can use this command.");

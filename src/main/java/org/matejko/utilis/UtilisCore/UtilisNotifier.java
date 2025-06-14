@@ -23,12 +23,14 @@ public class UtilisNotifier implements Listener {
     private final Map<String, String> messages;
     private final Messages messagesConfig;
     private final Utilis plugin;
+    private final Messages mmessages;
 	private Config config;
 
-    public UtilisNotifier(Utilis plugin, Config config) {
+    public UtilisNotifier(Utilis plugin, Config config, Messages mmessages) {
     	this.config = config;
         this.plugin = plugin;
         this.messages = new HashMap<>();
+        this.mmessages = mmessages;
         this.messagesConfig = new Messages(plugin);
         loadMessages();
     }
@@ -106,7 +108,7 @@ public class UtilisNotifier implements Listener {
                 if (onlinePlayer.hasPermission("utilis.vanish")) {
                 	if (config.isOpSeeVanishEnabled()) {
                 		if (!onlinePlayer.equals(newPlayer)) {
-                		   	onlinePlayer.sendMessage("§7[§2Utilis§7] " + newPlayer.getDisplayName() + ChatColor.GRAY + " joined while being vanished.");}
+                		   	onlinePlayer.sendMessage(ColorUtil.translateColorCodes(mmessages.getMessage("commands-prefix") + newPlayer.getDisplayName() + ChatColor.GRAY + " joined while being vanished."));}
                 	}
                 }
             }
@@ -132,7 +134,7 @@ public class UtilisNotifier implements Listener {
                 if (onlinePlayer.hasPermission("utilis.vanish")) {
                 	if (config.isOpSeeVanishEnabled()) {
                 		if (isPlayerVanished(quittingPlayer)) {
-                			onlinePlayer.sendMessage("§7[§2Utilis§7] " + quittingPlayer.getDisplayName() + ChatColor.GRAY + " left while being vanished.");}}
+                			onlinePlayer.sendMessage(ColorUtil.translateColorCodes(mmessages.getMessage("commands-prefix") + quittingPlayer.getDisplayName() + ChatColor.GRAY + " left while being vanished."));}}
                 	}
                 }
             }

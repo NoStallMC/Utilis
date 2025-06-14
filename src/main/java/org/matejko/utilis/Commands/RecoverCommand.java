@@ -9,18 +9,22 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import main.java.org.matejko.utilis.Managers.RecoverManager;
 import java.util.UUID;
+import main.java.org.matejko.utilis.FileCreator.Messages;
+import main.java.org.matejko.utilis.Managers.ColorUtil;
 
 public class RecoverCommand implements CommandExecutor {
     private final RecoverManager recoverManager;
+    private final Messages messages;
 
-    public RecoverCommand(RecoverManager recoverManager) {
+    public RecoverCommand(RecoverManager recoverManager, Messages messages) {
+    	this.messages = messages;
         this.recoverManager = recoverManager;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length != 1) {
-            sender.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "Usage: /recover <playername>");
+            sender.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.RED + "Usage: /recover <playername>"));
             return true;
         }
         String playerNameArg = args[0].toLowerCase();
@@ -32,17 +36,17 @@ public class RecoverCommand implements CommandExecutor {
             }
         }
         if (matchedPlayer == null) {
-            sender.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "Player not found or not online.");
+            sender.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.RED + "Player not found or not online."));
             return true;
         }
         UUID uuid = matchedPlayer.getUniqueId();
         if (!recoverManager.hasSavedInventory(uuid)) {
-            sender.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "No saved inventory found for player " + matchedPlayer.getName());
+            sender.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.RED + "No saved inventory found for player " + matchedPlayer.getName()));
             return true;
         }
         ItemStack[] savedInventory = recoverManager.recoverPlayerInventory(uuid);
         if (savedInventory == null) {
-            sender.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "Failed to load saved inventory.");
+            sender.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.RED + "Failed to load saved inventory."));
             return true;
         }
         Player target = matchedPlayer;
@@ -53,7 +57,7 @@ public class RecoverCommand implements CommandExecutor {
         System.arraycopy(savedInventory, 36, armor, 0, 4);
         target.getInventory().setContents(contents);
         target.getInventory().setArmorContents(armor);
-        sender.sendMessage("§7[§2Utilis§7] " + ChatColor.GREEN + "Recovered inventory for player " + target.getName());
+        sender.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.GREEN + "Recovered inventory for player " + target.getName()));
         return true;
     }
 }

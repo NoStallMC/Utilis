@@ -7,6 +7,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.util.config.Configuration;
 import main.java.org.matejko.utilis.Utilis;
 import main.java.org.matejko.utilis.FileCreator.Config;
+import main.java.org.matejko.utilis.FileCreator.Messages;
+
 import org.bukkit.event.EventHandler;
 import java.io.File;
 import java.util.HashMap;
@@ -16,12 +18,14 @@ public class NickManager implements Listener {
     private final Utilis plugin;
     private final File playerDataFile;
     private final Configuration config;
+    private final Messages messages;
     private final Config debug;
     private final Map<String, String[]> playerData;
 
-    public NickManager(Utilis plugin, Config debug) {
+    public NickManager(Utilis plugin, Config debug, Messages messages) {
         this.plugin = plugin;
 		this.debug = debug;
+		this.messages = messages;
         this.playerData = new HashMap<>();
         File nicksFolder = plugin.getDataFolder();
         if (!nicksFolder.exists()) {
@@ -93,7 +97,7 @@ public class NickManager implements Listener {
     public void setNickname(Player player, String nickname) {
         String playerName = player.getName();
         if (!isValidNickname(nickname)) {
-            player.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "The nickname " + "~" + nickname + " is already in use.");
+            player.sendMessage(messages.getMessage("commands-prefix")+ ChatColor.RED + "The nickname " + "~" + nickname + " is already in use.");
             return;
         }
         String currentColor = getPlayerColor(player);
@@ -113,7 +117,7 @@ public class NickManager implements Listener {
         	if (debug.isDebugEnabled()) {
         		plugin.getLogger().warning("[Utilis] Invalid color: " + color);
         	}
-            player.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "Invalid color specified.");
+            player.sendMessage(messages.getMessage("commands-prefix")+ ChatColor.RED + "Invalid color specified.");
             return;
         }
         playerData.put(playerName, new String[]{currentNickname, color});

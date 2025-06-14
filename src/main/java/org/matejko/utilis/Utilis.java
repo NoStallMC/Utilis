@@ -16,7 +16,8 @@ public class Utilis extends JavaPlugin implements Listener {
     public void onEnable() {
         this.logger = Logger.getLogger("Utilis");
         getLogger().info("[Utilis] is starting up!");
-        UtilisInitializer initializer = new UtilisInitializer(this);
+        Messages messages = new Messages(this);
+        UtilisInitializer initializer = new UtilisInitializer(this, messages);
         initializer.initialize();
         getLogger().info("[Utilis] has been enabled!");
     }

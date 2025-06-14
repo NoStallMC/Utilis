@@ -12,14 +12,18 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import main.java.org.matejko.utilis.Utilis;
 import main.java.org.matejko.utilis.FileCreator.Config;
 import main.java.org.matejko.utilis.Managers.VanishUserManager;
+import main.java.org.matejko.utilis.FileCreator.Messages;
+import main.java.org.matejko.utilis.Managers.ColorUtil;
 import org.bukkit.ChatColor;
 
 public class VanishCommand implements CommandExecutor {
 	private final List<String> silentVanished = new ArrayList<>();
     private final Utilis plugin;
     private final Config config;
+    private final Messages messages;
 
-    public VanishCommand(Utilis plugin, Config config) {
+    public VanishCommand(Utilis plugin, Config config, Messages messages) {
+    	this.messages = messages;
         this.plugin = plugin;
         this.config = config;
     }
@@ -37,7 +41,7 @@ public class VanishCommand implements CommandExecutor {
             String targetName = args[0];
             Player targetPlayer = getTargetPlayer(targetName);
             if (targetPlayer == null) {
-                player.sendMessage("§7[§2Utilis§7] " + ChatColor.RED + "Player not found or offline.");
+                player.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.RED + "Player not found or offline."));
                 return true;
             }
             toggleVanish(targetPlayer, silent);
@@ -55,7 +59,7 @@ public class VanishCommand implements CommandExecutor {
     	    for (Player target : Bukkit.getOnlinePlayers()) {
     	        target.hidePlayer(player);
     	    }
-    	    player.sendMessage("§7[§2Utilis§7] " + ChatColor.GRAY + "You are now hidden from players.");
+    	    player.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.GRAY + "You are now hidden from players."));
     	    return;
     	}
         VanishUserManager vanishUser = null;
@@ -77,7 +81,7 @@ public class VanishCommand implements CommandExecutor {
                 for (Player target : Bukkit.getOnlinePlayers()) {
                     if (target.hasPermission("utilis.vanish") && target != player) {
                         if (config.isOpSeeVanishEnabled()) {
-                            target.sendMessage("§7[§2Utilis§7] " + player.getDisplayName() + ChatColor.GRAY + " has unvanished.");
+                            target.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + player.getDisplayName() + ChatColor.GRAY + " has unvanished."));
                         }
                     } else {
                         // Only notify non-vanished players
@@ -87,7 +91,7 @@ public class VanishCommand implements CommandExecutor {
                     }
                 }
             }
-            player.sendMessage("§7[§2Utilis§7] " + ChatColor.GRAY + "You are now visible to other players.");
+            player.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.GRAY + "You are now visible to other players."));
             if (!silent && config.isDynmapHideEnabled()) {
                 plugin.getUtilisGetters().getDynmapManager().removeFromHiddenPlayersFile(player.getName());
             }
@@ -106,7 +110,7 @@ public class VanishCommand implements CommandExecutor {
                 for (Player target : Bukkit.getOnlinePlayers()) {
                     if (target.hasPermission("utilis.vanish") && target != player) {
                         if (config.isOpSeeVanishEnabled()) {
-                            target.sendMessage("§7[§2Utilis§7] " + player.getDisplayName() + ChatColor.GRAY + " has vanished.");
+                            target.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + player.getDisplayName() + ChatColor.GRAY + " has vanished."));
                         }
                     } else {
                         // Only notify non-vanished players
@@ -116,7 +120,7 @@ public class VanishCommand implements CommandExecutor {
                     }
                 }
             }
-            player.sendMessage("§7[§2Utilis§7] " + ChatColor.GRAY + "You are now hidden from other players.");
+            player.sendMessage(ColorUtil.translateColorCodes(messages.getMessage("commands-prefix") + ChatColor.GRAY + "You are now hidden from other players."));
             if (config.isDynmapHideEnabled()) {
                 plugin.getUtilisGetters().getDynmapManager().addToHiddenPlayersFile(player.getName());
             }

@@ -21,6 +21,8 @@ public class RecoverManager implements Listener {
     private final File saveDir;
     private final File uuidFile;
     final Map<UUID, String> uuidToName = new HashMap<>();
+    private static final String SAVE_TYPE_DEATH = "DEATH";
+    private static final String SAVE_TYPE_NORMAL = "NORMAL";
 
     public RecoverManager(Utilis plugin) {
         this.plugin = plugin;
@@ -81,6 +83,9 @@ public class RecoverManager implements Listener {
         return file != null && file.exists();
     }
     public void savePlayerInventory(Player player) {
+        savePlayerInventory(player, SAVE_TYPE_NORMAL);
+    }
+    private void savePlayerInventory(Player player, String saveType) {
         if (player == null || player.getInventory() == null) return;
         UUID uuid = player.getUniqueId();
         String playerName = player.getName().toLowerCase();
@@ -90,13 +95,14 @@ public class RecoverManager implements Listener {
         }
         ItemStack[] contents = player.getInventory().getContents();
         ItemStack[] armor = player.getInventory().getArmorContents();
-        saveInventoryToFile(playerName, uuid, contents, armor);
+        saveInventoryToFile(playerName, uuid, contents, armor, saveType);
     }
-    void saveInventoryToFile(String playerName, UUID uuid, ItemStack[] contents, ItemStack[] armor) {
+    void saveInventoryToFile(String playerName, UUID uuid, ItemStack[] contents, ItemStack[] armor, String saveType) {
         File file = new File(saveDir, playerName.toLowerCase() + ".inv");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             String readableTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
             writer.write("LastUpdate=" + readableTime + "\n");
+            writer.write("SaveType=" + saveType + "\n");
             writeItems(writer, "inv", contents);
             writeItems(writer, "armor", armor);
         } catch (IOException e) {
@@ -116,11 +122,23 @@ public class RecoverManager implements Listener {
     public ItemStack[] recoverPlayerInventory(UUID uuid) {
         File file = getInventoryFile(uuid);
         if (file == null || !file.exists()) return null;
-        ItemStack[] loaded = loadInventoryFromFile(file);
-        if (loaded == null) return null;
-        ItemStack[] contents = Arrays.copyOfRange(loaded, 0, 36);
-        ItemStack[] armor = Arrays.copyOfRange(loaded, 36, 40);
-        return concat(contents, armor);
+        Properties props = new Properties();
+        try (FileReader reader = new FileReader(file)) {
+            props.load(reader);
+        } catch (IOException e) {
+            if (config.isDebugEnabled()) {
+                plugin.getLogger().warning("[Utilis] Failed to load inventory from file " + file.getName() + ": " + e.getMessage());
+            }
+            return null;
+        }
+        String saveType = props.getProperty("SaveType", SAVE_TYPE_NORMAL);
+        if (SAVE_TYPE_DEATH.equalsIgnoreCase(saveType)) {
+            if (config.isDebugEnabled()) {
+                plugin.getLogger().info("[Utilis] Skipping inventory recovery due to DEATH save type for " + uuidToName.get(uuid));
+            }
+            return null;
+        }
+        return loadInventoryFromFile(file);
     }
     ItemStack[] loadInventoryFromFile(File file) {
         Properties props = new Properties();
@@ -201,6 +219,22 @@ public class RecoverManager implements Listener {
         }
         File file = new File(saveDir, currentName.toLowerCase() + ".inv");
         if (file.exists()) {
+            Properties props = new Properties();
+            try (FileReader reader = new FileReader(file)) {
+                props.load(reader);
+            } catch (IOException e) {
+                if (config.isDebugEnabled()) {
+                    plugin.getLogger().warning("[Utilis] Failed to load inventory file on join: " + e.getMessage());
+                }
+                return;
+            }
+            String saveType = props.getProperty("SaveType", SAVE_TYPE_NORMAL);
+            if (SAVE_TYPE_DEATH.equalsIgnoreCase(saveType)) {
+                if (config.isDebugEnabled()) {
+                    plugin.getLogger().info("[Utilis] Skipping inventory restore on join due to DEATH save type for " + currentName);
+                }
+                return;
+            }
             ItemStack[] loaded = loadInventoryFromFile(file);
             if (loaded != null) {
                 ItemStack[] contents = Arrays.copyOfRange(loaded, 0, 36);
@@ -212,7 +246,7 @@ public class RecoverManager implements Listener {
                 }
             }
         } else {
-            saveInventoryToFile(currentName.toLowerCase(), uuid, player.getInventory().getContents(), player.getInventory().getArmorContents());
+            saveInventoryToFile(currentName.toLowerCase(), uuid, player.getInventory().getContents(), player.getInventory().getArmorContents(), SAVE_TYPE_NORMAL);
             if (config.isDebugEnabled()) {
                 plugin.getLogger().info("[Utilis] Created new inventory file for " + currentName);
             }
@@ -222,7 +256,7 @@ public class RecoverManager implements Listener {
     public void onEntityDeath(EntityDeathEvent event) {
         Entity entity = event.getEntity();
         if (entity instanceof Player) {
-            savePlayerInventory((Player) entity);
+            savePlayerInventory((Player) entity, SAVE_TYPE_DEATH);
             if (config.isDebugEnabled()) {
                 plugin.getLogger().info("[Utilis] Inventory saved for " + ((Player) entity).getName() + " on death.");
             }
@@ -237,7 +271,7 @@ public class RecoverManager implements Listener {
             }
             return;
         }
-        savePlayerInventory(player);
+        savePlayerInventory(player, SAVE_TYPE_NORMAL);
         if (config.isDebugEnabled()) {
             plugin.getLogger().info("[Utilis] Inventory saved for " + player.getName() + " on quit.");
         }
