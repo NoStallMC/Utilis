@@ -32,7 +32,6 @@ public class RecoverManager implements Listener {
         }
         loadUUIDMap();
     }
-
     @SuppressWarnings("unchecked")
     private void loadUUIDMap() {
         if (!uuidFile.exists()) {
@@ -46,7 +45,7 @@ public class RecoverManager implements Listener {
                 Map<String, String> data = (Map<String, String>) loaded;
                 for (Map.Entry<String, String> e : data.entrySet()) {
                     try {
-                        uuidToName.put(UUID.fromString(e.getKey()), e.getValue());
+                        uuidToName.put(UUID.fromString(e.getKey()), e.getValue().toLowerCase());
                     } catch (IllegalArgumentException ignored) {}
                 }
                 if (config.isDebugEnabled()) {
@@ -57,7 +56,6 @@ public class RecoverManager implements Listener {
             plugin.getLogger().warning("[Utilis] Failed to load uuids.yml: " + e.getMessage());
         }
     }
-
     public void saveUUIDMap() {
         Yaml yaml = new Yaml();
         Map<String, String> data = new LinkedHashMap<>();
@@ -73,22 +71,19 @@ public class RecoverManager implements Listener {
             plugin.getLogger().warning("[Utilis] Failed to save uuids.yml: " + e.getMessage());
         }
     }
-
     private File getInventoryFile(UUID uuid) {
         String playerName = uuidToName.get(uuid);
         if (playerName == null) return null;
-        return new File(saveDir, playerName + ".inv");
+        return new File(saveDir, playerName.toLowerCase() + ".inv");
     }
-
     public boolean hasSavedInventory(UUID uuid) {
         File file = getInventoryFile(uuid);
         return file != null && file.exists();
     }
-
     public void savePlayerInventory(Player player) {
         if (player == null || player.getInventory() == null) return;
         UUID uuid = player.getUniqueId();
-        String playerName = player.getName();
+        String playerName = player.getName().toLowerCase();
         if (!playerName.equals(uuidToName.get(uuid))) {
             uuidToName.put(uuid, playerName);
             saveUUIDMap();
@@ -97,9 +92,8 @@ public class RecoverManager implements Listener {
         ItemStack[] armor = player.getInventory().getArmorContents();
         saveInventoryToFile(playerName, uuid, contents, armor);
     }
-
     void saveInventoryToFile(String playerName, UUID uuid, ItemStack[] contents, ItemStack[] armor) {
-        File file = new File(saveDir, playerName + ".inv");
+        File file = new File(saveDir, playerName.toLowerCase() + ".inv");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             String readableTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
             writer.write("LastUpdate=" + readableTime + "\n");
@@ -111,7 +105,6 @@ public class RecoverManager implements Listener {
             }
         }
     }
-
     private void writeItems(BufferedWriter writer, String prefix, ItemStack[] items) throws IOException {
         for (int i = 0; i < items.length; i++) {
             ItemStack item = items[i];
@@ -120,7 +113,6 @@ public class RecoverManager implements Listener {
             }
         }
     }
-
     public ItemStack[] recoverPlayerInventory(UUID uuid) {
         File file = getInventoryFile(uuid);
         if (file == null || !file.exists()) return null;
@@ -130,7 +122,6 @@ public class RecoverManager implements Listener {
         ItemStack[] armor = Arrays.copyOfRange(loaded, 36, 40);
         return concat(contents, armor);
     }
-
     ItemStack[] loadInventoryFromFile(File file) {
         Properties props = new Properties();
         try (FileReader reader = new FileReader(file)) {
@@ -159,7 +150,6 @@ public class RecoverManager implements Listener {
         }
         return concat(contents, armor);
     }
-
     private ItemStack parseItemStack(String raw) {
         try {
             String[] split = raw.split(",");
@@ -170,35 +160,33 @@ public class RecoverManager implements Listener {
         } catch (Exception ignored) {}
         return null;
     }
-
     private ItemStack[] concat(ItemStack[] contents, ItemStack[] armor) {
         ItemStack[] combined = new ItemStack[contents.length + armor.length];
         System.arraycopy(contents, 0, combined, 0, contents.length);
         System.arraycopy(armor, 0, combined, contents.length, armor.length);
         return combined;
     }
-    
     public UUID getUUIDFromSavedName(String name) {
+        String lookup = name.toLowerCase();
         for (Map.Entry<UUID, String> entry : uuidToName.entrySet()) {
-            if (entry.getValue().equalsIgnoreCase(name)) {
+            if (entry.getValue().equalsIgnoreCase(lookup)) {
                 return entry.getKey();
             }
         }
         return null;
     }
-
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-        String currentName = player.getName();
+        String currentName = player.getName().toLowerCase();
         String mappedName = uuidToName.get(uuid);
         if (mappedName == null) {
             uuidToName.put(uuid, currentName);
             saveUUIDMap();
         } else if (!mappedName.equals(currentName)) {
-            File oldFile = new File(saveDir, mappedName + ".inv");
-            File newFile = new File(saveDir, currentName + ".inv");
+            File oldFile = new File(saveDir, mappedName.toLowerCase() + ".inv");
+            File newFile = new File(saveDir, currentName.toLowerCase() + ".inv");
             if (oldFile.exists() && !newFile.exists()) {
                 if (oldFile.renameTo(newFile)) {
                     if (config.isDebugEnabled()) {
@@ -211,7 +199,7 @@ public class RecoverManager implements Listener {
             uuidToName.put(uuid, currentName);
             saveUUIDMap();
         }
-        File file = new File(saveDir, currentName + ".inv");
+        File file = new File(saveDir, currentName.toLowerCase() + ".inv");
         if (file.exists()) {
             ItemStack[] loaded = loadInventoryFromFile(file);
             if (loaded != null) {
@@ -223,9 +211,13 @@ public class RecoverManager implements Listener {
                     plugin.getLogger().info("[Utilis] Inventory restored for " + currentName);
                 }
             }
+        } else {
+            saveInventoryToFile(currentName.toLowerCase(), uuid, player.getInventory().getContents(), player.getInventory().getArmorContents());
+            if (config.isDebugEnabled()) {
+                plugin.getLogger().info("[Utilis] Created new inventory file for " + currentName);
+            }
         }
     }
-
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
         Entity entity = event.getEntity();
@@ -236,7 +228,6 @@ public class RecoverManager implements Listener {
             }
         }
     }
-
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
@@ -251,7 +242,6 @@ public class RecoverManager implements Listener {
             plugin.getLogger().info("[Utilis] Inventory saved for " + player.getName() + " on quit.");
         }
     }
-
     private boolean isInventoryEmpty(Player player) {
         for (ItemStack item : player.getInventory().getContents()) {
             if (item != null) return false;

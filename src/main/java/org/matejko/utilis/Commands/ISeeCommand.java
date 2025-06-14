@@ -72,7 +72,9 @@ public class ISeeCommand implements CommandExecutor {
             player.sendMessage("§7[§2Utilis§7] §cUsage: /isee <player>");
             return true;
         }
-        Player target = getTargetPlayer(args[0]);
+        String inputName = args[0];
+        String normalized = inputName.toLowerCase();
+        Player target = getTargetPlayer(normalized);
         if (target != null && target.isOnline()) {
             try {
                 iSeeManager.saveInventoryAndArmor(player);
@@ -91,26 +93,25 @@ public class ISeeCommand implements CommandExecutor {
             }
             return true;
         }
-        UUID uuid = recoverManager.getUUIDFromSavedName(args[0]);
+        UUID uuid = recoverManager.getUUIDFromSavedName(normalized);
         if (uuid == null) {
-            player.sendMessage("§7[§2Utilis§7] §cUnknown player: " + args[0]);
+            player.sendMessage("§7[§2Utilis§7] §cUnknown player: " + inputName);
             return true;
         }
         try {
             editor.storeViewerInventory(player);
-            editor.openOfflineInventory(player, args[0], uuid);
-            player.sendMessage("§7[§2Utilis§7] §aNow editing " + args[0] + "'s saved inventory. Type /isee to save changes.");
+            editor.openOfflineInventory(player, inputName, uuid);
+            player.sendMessage("§7[§2Utilis§7] §aNow editing " + inputName + "'s saved inventory. Type /isee to save changes.");
         } catch (IOException e) {
-            player.sendMessage("§7[§2Utilis§7] §cFailed to load inventory for " + args[0]);
+            player.sendMessage("§7[§2Utilis§7] §cFailed to load inventory for " + inputName);
             e.printStackTrace();
         }
         return true;
     }
-    private Player getTargetPlayer(String name) {
+    private Player getTargetPlayer(String lowercaseName) {
         Player match = null;
-        String lower = name.toLowerCase();
         for (Player p : Bukkit.getOnlinePlayers()) {
-            if (p.getName().toLowerCase().contains(lower)) {
+            if (p.getName().toLowerCase().contains(lowercaseName)) {
                 if (match != null) return null;
                 match = p;
             }
