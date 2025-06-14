@@ -11,7 +11,7 @@ import java.util.*;
 
 public class ISeeOfflineEditor implements Listener {
     private final File baseDir;
-    private final Map<UUID, ItemStack[]> savedInventories = new HashMap<>();
+    private final Map<UUID, ItemStack[][]> savedInventories = new HashMap<>();
     private final Map<UUID, UUID> offlineEditSession = new HashMap<>();
     private final RecoverManager recoverManager;
 
@@ -21,12 +21,15 @@ public class ISeeOfflineEditor implements Listener {
         if (!baseDir.exists()) baseDir.mkdirs();
     }
     public void storeViewerInventory(Player viewer) {
-        savedInventories.put(viewer.getUniqueId(), viewer.getInventory().getContents().clone());
+        ItemStack[] contents = viewer.getInventory().getContents().clone();
+        ItemStack[] armor = viewer.getInventory().getArmorContents().clone();
+        savedInventories.put(viewer.getUniqueId(), new ItemStack[][] { contents, armor });
     }
     public void restoreViewerInventory(Player viewer) {
-        ItemStack[] stored = savedInventories.remove(viewer.getUniqueId());
+        ItemStack[][] stored = savedInventories.remove(viewer.getUniqueId());
         if (stored != null) {
-            viewer.getInventory().setContents(stored);
+            viewer.getInventory().setContents(stored[0]);
+            viewer.getInventory().setArmorContents(stored[1]);
         }
     }
     public void openOfflineInventory(Player viewer, String targetName, UUID targetUUID) throws IOException {
