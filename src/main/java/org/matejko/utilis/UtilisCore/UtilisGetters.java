@@ -24,6 +24,7 @@ public class UtilisGetters {
     private SleepingManager sleepingManager;
     private NickManager nickManager;
 	private static ISeeManager iSeeManager;
+	private static ISeeOfflineEditor iSeeOfflineEditor;
 
     public UtilisGetters(Logger logger, Set<VanishUserManager> vanishedPlayers, VanishedPlayersManager vanishedPlayersManager,
                          MOTDManager motdManager, DynmapManager dynmapManager, UtilisNotifier utilisNotifier,
@@ -80,6 +81,13 @@ public class UtilisGetters {
 	}
 	public static ISeeManager getISeeManager() {
 		return iSeeManager;
+	}
+	public static void setISeeOfflineEditor(ISeeOfflineEditor editor) {
+	    iSeeOfflineEditor = editor;
+	}
+
+	public static ISeeOfflineEditor getISeeOfflineEditor() {
+	    return iSeeOfflineEditor;
 	}
     // Check if a player is AFK using the Essentials API
     public boolean isAFK(Player player) {

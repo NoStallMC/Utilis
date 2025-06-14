@@ -8,6 +8,9 @@ import main.java.org.matejko.utilis.Commands.*;
 import main.java.org.matejko.utilis.FileCreator.*;
 import main.java.org.matejko.utilis.Listeners.*;
 import main.java.org.matejko.utilis.Managers.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,6 +41,25 @@ public class UtilisInitializer {
         } else {
             plugin.getLogger().info("[Utilis] Essentials plugin found!");
         }
+        // Initialize RecoverManager
+        File uuidFile = new File(plugin.getDataFolder(), "uuids.yml");
+        if (!plugin.getDataFolder().exists()) plugin.getDataFolder().mkdirs();
+        if (!uuidFile.exists()) {
+            try {
+                if (uuidFile.createNewFile()) {
+                    try (FileWriter writer = new FileWriter(uuidFile)) {
+                        writer.write("{}\n");
+                    }
+                }
+            } catch (IOException e) {
+                plugin.getLogger().warning("[Utilis] Could not create uuids.yml file: " + e.getMessage());
+            }
+        }
+        RecoverManager recoverManager = new RecoverManager(plugin);
+        plugin.getServer().getPluginManager().registerEvents(recoverManager, plugin);
+        recoverManager.saveUUIDMap();
+        plugin.getCommand("recover").setExecutor(new RecoverCommand(recoverManager));
+        if (config.isDebugEnabled()) plugin.getLogger().info("[Utilis] RecoverManager initialised.");
         // Initialize ISee
         ISeeManager iSeeManager = new ISeeManager(config);
         if (config.isDebugEnabled()) {
@@ -49,6 +71,9 @@ public class UtilisInitializer {
         Bukkit.getPluginManager().registerEvents(new ISeeArmorRemover(iSeeManager), plugin);
         Bukkit.getPluginManager().registerEvents(iSeeInventoryListener, plugin);
         UtilisGetters.setISeeManager(iSeeManager);
+        ISeeOfflineEditor iSeeOfflineEditor = new ISeeOfflineEditor(recoverManager);
+        plugin.getServer().getPluginManager().registerEvents(iSeeOfflineEditor, plugin);
+        UtilisGetters.setISeeOfflineEditor(iSeeOfflineEditor);
         if (config.isDebugEnabled()) {
             plugin.getLogger().info("[Utilis] ISee initialisation completed.");
         }
@@ -103,13 +128,6 @@ public class UtilisInitializer {
             if (config.isDebugEnabled()) {
                 plugin.getLogger().info("[Utilis] MOTD is in config disabled.");
             }
-        }
-        // Register the RecoverManager as an event listener
-        RecoverManager recoverManager = new RecoverManager(plugin);
-        plugin.getServer().getPluginManager().registerEvents(recoverManager, plugin);
-        plugin.getCommand("recover").setExecutor(new RecoverCommand(recoverManager));
-        if (config.isDebugEnabled()) {
-            plugin.getLogger().info("[Utilis] RecoverManager initialised.");
         }
         // Plugin Updater
         UtilisPluginUpdater pluginUpdater = new UtilisPluginUpdater(plugin, config);

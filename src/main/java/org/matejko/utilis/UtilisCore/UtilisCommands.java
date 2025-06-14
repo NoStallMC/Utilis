@@ -61,6 +61,7 @@ public class UtilisCommands {
         ISeeManager iSeeManager = UtilisGetters.getISeeManager();
         ISeeInventoryListener iSeeInventoryListener = new ISeeInventoryListener(plugin, iSeeManager);
         ISeeArmorListener iSeeArmorListener = new ISeeArmorListener(plugin, iSeeManager);
+        ISeeOfflineEditor iSeeOfflineEditor = UtilisGetters.getISeeOfflineEditor();
         plugin.getCommand("isee").setExecutor(new CommandExecutor() {
             @Override
             public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -73,8 +74,13 @@ public class UtilisCommands {
                     player.sendMessage("§7[§2Utilis§7] " + "§cYou do not have permission to use this command.");
                     return true;
                 }
-                new ISeeCommand(iSeeManager, iSeeInventoryListener, iSeeArmorListener, plugin)
-                        .onCommand(sender, command, label, args);
+                new ISeeCommand(
+                    iSeeManager,
+                    iSeeInventoryListener,
+                    iSeeArmorListener,
+                    iSeeOfflineEditor,
+                    recoverManager
+                ).onCommand(sender, command, label, args);
                 return true;
             }
         });

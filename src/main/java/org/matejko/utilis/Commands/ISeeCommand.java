@@ -1,113 +1,120 @@
 package main.java.org.matejko.utilis.Commands;
 
-import java.util.logging.Logger;
-
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import main.java.org.matejko.utilis.Utilis;
 import main.java.org.matejko.utilis.Listeners.ISeeArmorListener;
 import main.java.org.matejko.utilis.Listeners.ISeeInventoryListener;
 import main.java.org.matejko.utilis.Managers.ISeeManager;
+import main.java.org.matejko.utilis.Managers.ISeeOfflineEditor;
+import main.java.org.matejko.utilis.Managers.RecoverManager;
+import java.io.IOException;
+import java.util.UUID;
 
 public class ISeeCommand implements CommandExecutor {
     private final ISeeManager iSeeManager;
     private final ISeeInventoryListener iSeeInventoryListener;
     private final ISeeArmorListener iSeeArmorListener;
-    private final Logger logger;
-    
-    public ISeeCommand(ISeeManager iSeeManager, ISeeInventoryListener iSeeInventoryListener, ISeeArmorListener iSeeArmorListener, Utilis plugin) {
+    private final ISeeOfflineEditor editor;
+    private final RecoverManager recoverManager;
+
+    public ISeeCommand(ISeeManager iSeeManager,
+                       ISeeInventoryListener iSeeInventoryListener,
+                       ISeeArmorListener iSeeArmorListener,
+                       ISeeOfflineEditor editor,
+                       RecoverManager recoverManager) {
         this.iSeeManager = iSeeManager;
         this.iSeeInventoryListener = iSeeInventoryListener;
         this.iSeeArmorListener = iSeeArmorListener;
-        this.logger = Logger.getLogger("Utilis");
+        this.editor = editor;
+        this.recoverManager = recoverManager;
     }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        // Check if the sender is a player
         if (!(sender instanceof Player)) {
-            sender.sendMessage("Only players can use this command!");
+            sender.sendMessage("[Utilis] Only players can use this command.");
             return true;
         }
         Player player = (Player) sender;
-        // Check if iSeeManager is null
-        if (iSeeManager == null) {
-            player.sendMessage("§7[§2Utilis§7] " + "§cInternal error: iSeeManager is not initialized.");
-            logger.warning("[Utilis] Error: iSeeManager is null. Check plugin initialization.");
+        if (!player.hasPermission("utilis.isee")) {
+            player.sendMessage("§7[§2Utilis§7] §cYou do not have permission to use this command.");
             return true;
         }
-        // Check if the player is already in inventory viewing mode
-        Player currentTarget = iSeeManager.getCurrentTarget(player);
-        if (currentTarget != null) {
-            // Restore the player's original inventory and exit viewing mode
+        if (editor.isInOfflineEditMode(player)) {
             try {
-                iSeeManager.restoreInventoryAndArmor(player);
-                iSeeManager.clearTarget(player);
-                player.sendMessage("§7[§2Utilis§7] " + "§aYou have exited inventory viewing mode and your inventory and armor have been restored.");
-                // Stop inventory and armor syncing
-                iSeeInventoryListener.stopInventorySync(player);
-                iSeeArmorListener.stopArmorSync(player);
-            } catch (Exception e) {
-                player.sendMessage("§7[§2Utilis§7] " + "§cError while restoring your inventory.");
+                editor.saveOfflineInventory(player);
+                player.sendMessage("§7[§2Utilis§7] §aOffline inventory updated and saved.");
+            } catch (IOException e) {
+                player.sendMessage("§7[§2Utilis§7] §cFailed to save edited offline inventory.");
                 e.printStackTrace();
             }
             return true;
         }
-        // Ensure a target player is specified
-        if (args.length < 1) {
-            player.sendMessage("§7[§2Utilis§7] " + "§cUsage: /isee <player>");
-            return true;
-        }
-        // Get target player by partial name
-        Player target = getTargetPlayer(args[0]);
-        if (target == null || !target.isOnline()) {
-            player.sendMessage("§7[§2Utilis§7] " + "§cPlayer not found or offline.");
-            return true;
-        }
-        // Save the viewer's current inventory to restore later
-        try {
-            iSeeManager.saveInventoryAndArmor(player);
-        } catch (Exception e) {
-            player.sendMessage("§7[§2Utilis§7] " + "§cError saving your inventory. Please try again.");
-            e.printStackTrace();
-            return true;
-        }
-        // Clone the target player's inventory
-        try {
-            PlayerInventory targetInventory = target.getInventory();
-            PlayerInventory viewerInventory = player.getInventory();
-            viewerInventory.clear();
-            ItemStack[] targetContents = targetInventory.getContents();
-            if (targetContents != null) {
-                viewerInventory.setContents(targetContents);
+        Player currentTarget = iSeeManager.getCurrentTarget(player);
+        if (currentTarget != null) {
+            try {
+                iSeeManager.restoreInventoryAndArmor(player);
+                iSeeManager.clearTarget(player);
+                iSeeInventoryListener.stopInventorySync(player);
+                iSeeArmorListener.stopArmorSync(player);
+                player.sendMessage("§7[§2Utilis§7] §aYou have exited inventory viewing mode and your inventory has been restored.");
+            } catch (Exception e) {
+                player.sendMessage("§7[§2Utilis§7] §cError while restoring your inventory.");
+                e.printStackTrace();
             }
-            player.sendMessage("§7[§2Utilis§7] " + "§aNow viewing and editing " + target.getName() + "'s inventory. Type /isee again to exit and restore your inventory.");
-            iSeeManager.setCurrentTarget(player, target);
-            iSeeInventoryListener.startInventorySync(player);
-            iSeeArmorListener.startArmorSync(player);
-        } catch (Exception e) {
-            player.sendMessage("§7[§2Utilis§7] " + "§cError accessing the target player's inventory.");
-            e.printStackTrace();
             return true;
+        }
+        if (args.length < 1) {
+            player.sendMessage("§7[§2Utilis§7] §cUsage: /isee <player>");
+            return true;
+        }
+        Player target = getTargetPlayer(args[0]);
+        if (target != null && target.isOnline()) {
+            try {
+                iSeeManager.saveInventoryAndArmor(player);
+                PlayerInventory targetInv = target.getInventory();
+                PlayerInventory viewerInv = player.getInventory();
+                viewerInv.clear();
+                viewerInv.setContents(targetInv.getContents());
+                viewerInv.setArmorContents(targetInv.getArmorContents());
+                iSeeManager.setCurrentTarget(player, target);
+                iSeeInventoryListener.startInventorySync(player);
+                iSeeArmorListener.startArmorSync(player);
+                player.sendMessage("§7[§2Utilis§7] §aNow viewing and editing " + target.getName() + "'s inventory. Type /isee again to exit.");
+            } catch (Exception e) {
+                player.sendMessage("§7[§2Utilis§7] §cError syncing inventory.");
+                e.printStackTrace();
+            }
+            return true;
+        }
+        UUID uuid = recoverManager.getUUIDFromSavedName(args[0]);
+        if (uuid == null) {
+            player.sendMessage("§7[§2Utilis§7] §cUnknown player: " + args[0]);
+            return true;
+        }
+        try {
+            editor.storeViewerInventory(player);
+            editor.openOfflineInventory(player, args[0], uuid);
+            player.sendMessage("§7[§2Utilis§7] §aNow editing " + args[0] + "'s saved inventory. Type /isee to save changes.");
+        } catch (IOException e) {
+            player.sendMessage("§7[§2Utilis§7] §cFailed to load inventory for " + args[0]);
+            e.printStackTrace();
         }
         return true;
     }
-    private Player getTargetPlayer(String targetName) {
-        Player targetPlayer = null;
-        String nickname = targetName.toLowerCase();
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            if (onlinePlayer.getName().toLowerCase().contains(nickname)) {
-                if (targetPlayer != null) {
-                    // More than one player matches, return null
-                    return null;
-                }
-                targetPlayer = onlinePlayer;
+    private Player getTargetPlayer(String name) {
+        Player match = null;
+        String lower = name.toLowerCase();
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (p.getName().toLowerCase().contains(lower)) {
+                if (match != null) return null;
+                match = p;
             }
         }
-        return targetPlayer;
+        return match;
     }
 }

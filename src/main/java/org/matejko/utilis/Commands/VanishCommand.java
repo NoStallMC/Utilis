@@ -1,16 +1,21 @@
 package main.java.org.matejko.utilis.Commands;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerJoinEvent;
 import main.java.org.matejko.utilis.Utilis;
 import main.java.org.matejko.utilis.FileCreator.Config;
 import main.java.org.matejko.utilis.Managers.VanishUserManager;
 import org.bukkit.ChatColor;
 
 public class VanishCommand implements CommandExecutor {
+	private final List<String> silentVanished = new ArrayList<>();
     private final Utilis plugin;
     private final Config config;
 
@@ -43,6 +48,16 @@ public class VanishCommand implements CommandExecutor {
         return true;
     }
     private void toggleVanish(Player player, boolean silent) {
+    	if (silent) {
+    	    if (!silentVanished.contains(player.getName())) {
+    	        silentVanished.add(player.getName());
+    	    }
+    	    for (Player target : Bukkit.getOnlinePlayers()) {
+    	        target.hidePlayer(player);
+    	    }
+    	    player.sendMessage("§7[§2Utilis§7] " + ChatColor.GRAY + "You are now hidden from players.");
+    	    return;
+    	}
         VanishUserManager vanishUser = null;
         // Check if the player is already vanished
         for (VanishUserManager vu : plugin.getUtilisGetters().getVanishedPlayers()) {
@@ -54,6 +69,7 @@ public class VanishCommand implements CommandExecutor {
         if (vanishUser != null) {
             // Player is already vanished, so unvanish them
             plugin.getUtilisGetters().getVanishedPlayers().remove(vanishUser);
+            silentVanished.remove(player.getName());
             for (Player target : Bukkit.getOnlinePlayers()) {
                 target.showPlayer(player);
             }
@@ -72,7 +88,7 @@ public class VanishCommand implements CommandExecutor {
                 }
             }
             player.sendMessage("§7[§2Utilis§7] " + ChatColor.GRAY + "You are now visible to other players.");
-            if (config.isDynmapHideEnabled()) {
+            if (!silent && config.isDynmapHideEnabled()) {
                 plugin.getUtilisGetters().getDynmapManager().removeFromHiddenPlayersFile(player.getName());
             }
         } else {
@@ -121,5 +137,15 @@ public class VanishCommand implements CommandExecutor {
             targetPlayer = Bukkit.getPlayerExact(targetName);
         }
         return targetPlayer;
+    }
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player joining = event.getPlayer();
+        for (String silentName : silentVanished) {
+            Player silentPlayer = Bukkit.getPlayerExact(silentName);
+            if (silentPlayer != null && silentPlayer.isOnline()) {
+                joining.hidePlayer(silentPlayer);
+            }
+        }
     }
 }

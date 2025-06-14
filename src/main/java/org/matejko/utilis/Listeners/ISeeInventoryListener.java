@@ -30,8 +30,8 @@ public class ISeeInventoryListener implements Listener {
         this.plugin = plugin;
     }
     public void startInventorySync(final Player viewer) {
-        if (isSyncing) return; // Prevent multiple sync tasks
-        alive = true; // Ensure sync task is alive when starting
+        if (isSyncing) return;
+        alive = true;
         taskId = plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
         	@Override
         	public void run() {
@@ -51,7 +51,6 @@ public class ISeeInventoryListener implements Listener {
         	        if (isDebugEnabled()) { 
         	            logger.info("[Utilis] [DEBUG] Target is either null or offline. (inv)");
         	        }
-        	        // If target is null or offline, restore the viewer's inventory and stop syncing
         	        iSeeManager.restoreInventoryAndArmor(viewer);
         	        iSeeManager.clearTarget(viewer);
         	        logger.info("[Utilis] Viewer " + viewer.getName() + "'s inventory and armor restored due to target being null or offline.");
