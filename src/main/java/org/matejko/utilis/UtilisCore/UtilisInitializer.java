@@ -158,6 +158,7 @@ public class UtilisInitializer {
         }
         // QoL Manager
         if (config.isQoLEnabled()) {
+            new SafeAfkManager(plugin);  // SafeAFK Listener
             Bukkit.getPluginManager().registerEvents(new QoLManager(), plugin);
             if (config.isDebugEnabled()) {
                 plugin.getLogger().info("[Utilis] QoL is enabled.");

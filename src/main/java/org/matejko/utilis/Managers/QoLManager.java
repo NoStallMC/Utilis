@@ -3,6 +3,7 @@ package main.java.org.matejko.utilis.Managers;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -30,6 +31,15 @@ public class QoLManager implements Listener{
                 block.getWorld().dropItem(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(block.getTypeId(), 1));
                 block.setTypeId(0); 
             }
+        }
+    }
+    @EventHandler
+    public void onSignChange(SignChangeEvent event) {
+        for (int i = 0; i < event.getLines().length; i++) {
+            String line = event.getLine(i);
+            if (line == null) continue;
+            String coloredLine = ColorUtil.translateColorCodes(line);
+            event.setLine(i, coloredLine);
         }
     }
 }

@@ -4,10 +4,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
-
 import main.java.org.matejko.utilis.FileCreator.*;
 import main.java.org.matejko.utilis.Managers.*;
-
 import java.util.Set;
 import java.util.logging.Logger;
 
